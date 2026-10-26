@@ -1,0 +1,80 @@
+[
+  {
+    "id": "cat-athletics",
+    "name": "Athletics (Track & Field)",
+    "slug": "Athletics",
+    "icon": "sprint",
+    "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
+    "tagline": "Sprints, Relays, Hurdles, Long Jump & Decathlons",
+    "activeTournaments": 8,
+    "registeredAthletes": 480,
+    "topVenue": "Sree Kanteerava Outdoor Stadium",
+    "circuits": ["AIU Inter-University", "AFI National Grand Prix", "State Trials"],
+    "popularEvents": ["100m Dash", "400m Flat", "4x400m Relay", "1500m Mid-Distance"]
+  },
+  {
+    "id": "cat-football",
+    "name": "Football (Soccer)",
+    "slug": "Football",
+    "icon": "sports_soccer",
+    "image": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+    "tagline": "Inter-Collegiate Knockouts & Varsity League Cups",
+    "activeTournaments": 5,
+    "registeredAthletes": 620,
+    "topVenue": "Bengaluru Football Stadium, Ashok Nagar",
+    "circuits": ["AIU Football Cup", "Reliance Foundation Youth Sports", "State Trophy"],
+    "popularEvents": ["Men Varsity 11v11", "Collegiate Futsal 5v5", "Under-21 Club Trials"]
+  },
+  {
+    "id": "cat-badminton",
+    "name": "Badminton Championship",
+    "slug": "Badminton",
+    "icon": "sports_tennis",
+    "image": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=800&q=80",
+    "tagline": "BAI Sanctioned Singles, Doubles & Mixed Trophy",
+    "activeTournaments": 6,
+    "registeredAthletes": 310,
+    "topVenue": "Padukone-Dravid Centre for Sports Excellence",
+    "circuits": ["National Collegiate Badminton", "State Open Ranking", "AIU Shuttle Cup"],
+    "popularEvents": ["Men Singles BWF", "Women Singles", "Mixed Doubles Tier-1"]
+  },
+  {
+    "id": "cat-swimming",
+    "name": "Aquatics & Swimming",
+    "slug": "Swimming",
+    "icon": "pool",
+    "image": "https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&w=800&q=80",
+    "tagline": "50m Olympic Pool Freestyle, Butterfly & Medley",
+    "activeTournaments": 4,
+    "registeredAthletes": 195,
+    "topVenue": "BAC Olympic Aquatic Complex, Bengaluru",
+    "circuits": ["SFI South Zone Invitational", "Collegiate Aquatics Trophy", "State Water Polo"],
+    "popularEvents": ["50m Freestyle Sprint", "100m Butterfly", "4x100m Medley Relay"]
+  },
+  {
+    "id": "cat-volleyball",
+    "name": "Volleyball Masters",
+    "slug": "Volleyball",
+    "icon": "sports_volleyball",
+    "image": "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=800&q=80",
+    "tagline": "Indoor Court Spikers, Blockers & Varsity Cups",
+    "activeTournaments": 3,
+    "registeredAthletes": 240,
+    "topVenue": "Koramangala Indoor Arena, Bengaluru",
+    "circuits": ["Karnataka Volleyball Federation", "South Zone Inter-University"],
+    "popularEvents": ["Men 6v6 Indoor", "Women Collegiate League", "Beach Volleyball 2v2"]
+  },
+  {
+    "id": "cat-basketball",
+    "name": "Basketball Championship",
+    "slug": "Basketball",
+    "icon": "sports_basketball",
+    "image": "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80",
+    "tagline": "FIBA Hardwood Tournaments & 3x3 Streetball",
+    "activeTournaments": 3,
+    "registeredAthletes": 280,
+    "topVenue": "Kanteerava Indoor Stadium, Bengaluru",
+    "circuits": ["AIU Basketball Trophy", "BFI National Collegiate", "All-India 3x3"],
+    "popularEvents": ["Men 5v5 Full Court", "Women 5v5 Varsity", "3x3 Pro Circuit"]
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "name": "SportSphere - Universal Sports & Talent Platform",
+  "description": "Universal sports competition discovery, athlete talent scouting, and tournament registration platform with real-time trials and verified analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,116 @@
+[
+  {
+    "id": "hl-1",
+    "author": {
+      "name": "Student Athlete",
+      "handle": "@student_athlete",
+      "role": "Varsity Competitor",
+      "avatar": "https://ui-avatars.com/api/?name=Student+Athlete&background=2563eb&color=fff&size=150&bold=true",
+      "verified": true,
+      "badge": "Federation Verified"
+    },
+    "timestamp": "2 hours ago",
+    "sport": "Track & Field",
+    "title": "Sub-47s 400m Block Acceleration & Final 100m Stretch",
+    "caption": "Pushed past personal best at Kanteerava Track #3 morning session. Split 3 Home stretch velocity held at 7.94 m/s. Road to All-India Inter-University Gold Gala! ⚡🏃‍♂️ #SprintLife #AFI #400m",
+    "mediaType": "video",
+    "mediaUrl": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80",
+    "stats": {
+      "timing": "46.82s (PB)",
+      "cadence": "4.6 strides/sec",
+      "splitTime": "Split 4: 12.60s"
+    },
+    "likes": 248,
+    "hasLiked": false,
+    "commentsCount": 34,
+    "shares": 19,
+    "views": "3.4K",
+    "tags": ["SprintRecord", "VarsityGold", "AthleticsIndia"]
+  },
+  {
+    "id": "hl-2",
+    "author": {
+      "name": "Vikram Sengupta",
+      "handle": "@vikram_lead",
+      "role": "Relay Squad Lead-off",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+      "verified": true,
+      "badge": "Varsity Team"
+    },
+    "timestamp": "5 hours ago",
+    "sport": "Athletics",
+    "title": "Blind Baton Hand-off Drill at Full Velocity",
+    "caption": "Perfecting the zone 2 handoff drill with squad. Clocked 0.28s exchange delta inside the 20m acceleration box. Zero fumble margin for South Zone Finals! 🤝⚡",
+    "mediaType": "image",
+    "mediaUrl": "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1200&q=80",
+    "stats": {
+      "timing": "0.28s Delta",
+      "cadence": "Full Sprint",
+      "splitTime": "20m Box Pass"
+    },
+    "likes": 182,
+    "hasLiked": true,
+    "commentsCount": 16,
+    "shares": 12,
+    "views": "2.1K",
+    "tags": ["4x400Relay", "BatonHandOff", "TrackNation"]
+  },
+  {
+    "id": "hl-3",
+    "author": {
+      "name": "Pooja Deshmukh",
+      "handle": "@pooja_shuttle",
+      "role": "Badminton State Seed #3",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
+      "verified": true,
+      "badge": "BAI State Seed"
+    },
+    "timestamp": "1 day ago",
+    "sport": "Badminton",
+    "title": "Championship Match Point Jump Smash 🏸💥",
+    "caption": "Quarter-final tiebreaker at Padukone Academy. 340 km/h steep smash down the line to seal the collegiate semifinal berth. Focused on the Gold!",
+    "mediaType": "video",
+    "mediaUrl": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80",
+    "stats": {
+      "timing": "340 km/h Smash",
+      "cadence": "Rally: 28 Shots",
+      "splitTime": "Set 3: 21-19"
+    },
+    "likes": 412,
+    "hasLiked": false,
+    "commentsCount": 58,
+    "shares": 45,
+    "views": "5.8K",
+    "tags": ["JumpSmash", "BWFBadminton", "CollegiateSports"]
+  },
+  {
+    "id": "hl-4",
+    "author": {
+      "name": "Bengaluru Central Football",
+      "handle": "@bcu_football",
+      "role": "Varsity Soccer Club",
+      "avatar": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=150&q=80",
+      "verified": true,
+      "badge": "AIU Certified Team"
+    },
+    "timestamp": "2 days ago",
+    "sport": "Football",
+    "title": "92nd Minute Stoppage Time Free Kick Curler ⚽🎯",
+    "caption": "Top bin curler from 28 yards out to secure the Inter-University quarter-final spot! What a performance by the squad under stadium floodlights.",
+    "mediaType": "image",
+    "mediaUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80",
+    "stats": {
+      "timing": "92:14 Goal",
+      "cadence": "28 Yards Free Kick",
+      "splitTime": "Score: 2-1 (FT)"
+    },
+    "likes": 560,
+    "hasLiked": false,
+    "commentsCount": 81,
+    "shares": 63,
+    "views": "8.2K",
+    "tags": ["CollegeFootball", "FreeKickGoal", "TopCorner"]
+  }
+]

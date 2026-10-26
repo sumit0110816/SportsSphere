@@ -1,0 +1,275 @@
+{
+  "profile": {
+    "name": "Student Athlete",
+    "handle": "student-athlete",
+    "headline": "Varsity Student Athlete | Federation Registered | Open for Collegiate Scouting & Trials",
+    "role": "Varsity Student Athlete",
+    "institution": "Varsity Sports Association",
+    "department": "Sports Sciences & Athletics Department",
+    "location": "Regional Hub, India",
+    "regNumber": "BCU-2023-ATH-0941",
+    "avatar": "https://ui-avatars.com/api/?name=Student+Athlete&background=2563eb&color=fff&size=400&bold=true",
+    "banner": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1600&q=80",
+    "isOpenToScout": true,
+    "scoutingRoles": ["National Track League Squads", "World University Games Relay Trials", "Corporate Sports Quota Officer"],
+    "scoutIndex": 94,
+    "stateRank": 2,
+    "nationalPercentile": "Top 2% Varsity Sprinters",
+    "personalBest": "46.82s (400m)",
+    "secondaryBest": "21.14s (200m)",
+    "reactionTime": "0.142s (Blocks)",
+    "trainingPace": "8.85 m/s",
+    "connectionsCount": "840+ Sports Network Connections",
+    "verifiedBadges": [
+      "AFI Electronic Photofinish Certified",
+      "AIU National Collegiate Champion",
+      "NADA Anti-Doping Cleared (A-Pool)",
+      "SAI High Performance Talent Node"
+    ],
+    "bio": "Competitive varsity student athlete. Actively training and competing in regional and national championship circuits. Passionate about biomechanical performance, athletic excellence, and sportsmanship."
+  },
+  "experience": [
+    {
+      "id": "exp-1",
+      "role": "Team Captain & Anchor Leg (4x400m)",
+      "organization": "Bengaluru Central University Varsity Track Squad",
+      "duration": "Jul 2023 – Present • 2 yrs 4 mos",
+      "location": "Bengaluru, India",
+      "description": "Leading the 5-member varsity relay squad. Anchored the team to victory at the South Zone Games with a split of 45.92s. Overseeing daily acceleration drills and blocks reaction training."
+    },
+    {
+      "id": "exp-2",
+      "role": "Senior Men 400m Sprinter",
+      "organization": "Karnataka State Athletics Association (KSAA)",
+      "duration": "Jan 2022 – Present • 3 yrs 10 mos",
+      "location": "Sree Kanteerava Outdoor Stadium",
+      "description": "Ranked #2 statewide in Under-23 Men division. Secured Silver Medal at the Karnataka State Open with 47.05s."
+    },
+    {
+      "id": "exp-3",
+      "role": "Junior National Sprint Trainee",
+      "organization": "Sports Authority of India (SAI) Regional Centre",
+      "duration": "Jun 2020 – Dec 2021 • 1 yr 7 mos",
+      "location": "SAI Southern Centre, Bengaluru",
+      "description": "Selected under the National Talent Scouting Scheme. Underwent specialized cadence pacing and electronic gate speed analysis."
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-1",
+      "degree": "Bachelor of Physical Education & Sports Sciences (B.P.Ed)",
+      "institution": "Bengaluru Central University",
+      "duration": "2022 – 2026 (Expected)",
+      "grade": "First Class with Distinction (CGPA: 8.8/10)",
+      "activities": "Captain of University Track Team, Sports Council Representative, Dean's Sports Honor Roll"
+    }
+  ],
+  "skills": [
+    { "name": "400m Pacing & Acceleration Curve", "endorsements": 42 },
+    { "name": "Starting Blocks Reaction Drive", "endorsements": 38 },
+    { "name": "Blind Baton Exchange (20m Box)", "endorsements": 35 },
+    { "name": "VO2 Max Anaerobic Conditioning", "endorsements": 29 },
+    { "name": "Photofinish Velocity Analysis", "endorsements": 26 },
+    { "name": "Sports Psychology & Race Focus", "endorsements": 24 }
+  ],
+  "recommendations": [
+    {
+      "id": "rec-1",
+      "author": "Coach Rameshwar Singh",
+      "role": "Chief Athletics Coach • AFI Level-3 Certified",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80",
+      "relation": "Coached student athlete for 3+ years in University & State Circuits",
+      "text": "Possesses rare competitive drive and mental toughness in pressure situations. Their ability to maintain focus and technique under fatigue is exemplary. Any national club or university program would benefit tremendously from their discipline and leadership."
+    },
+    {
+      "id": "rec-2",
+      "author": "Dr. Sunita Murthy",
+      "role": "Director of Physical Education • Collegiate Sports Board",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80",
+      "relation": "University Sports Faculty & Athletic Board Overseer",
+      "text": "Exemplifies outstanding student-athlete balance. Leads by example in training attendance, ethical sportsmanship, and anti-doping integrity. A true role model for upcoming collegiate athletes."
+    }
+  ],
+  "upcomingEvents": [
+    {
+      "id": "up-1",
+      "title": "Karnataka State Athletic Selection Trials",
+      "month": "OCT",
+      "day": "28",
+      "dateStr": "Oct 28, 2025",
+      "venue": "Kanteerava Outdoor Stadium, Track #3",
+      "callTime": "Call Time: 07:30 AM IST",
+      "status": "Confirmed",
+      "bibNumber": "KA-400M-8492",
+      "heatInfo": "Heat 2 — Lane 4 Assignment",
+      "category": "400m Men U-23",
+      "isImportant": true
+    },
+    {
+      "id": "up-2",
+      "title": "Inter-Zone University Sprint Quarter-Finals",
+      "month": "NOV",
+      "day": "05",
+      "dateStr": "Nov 05, 2025",
+      "venue": "Mysore University Athletic Complex",
+      "callTime": "Call Time: 09:15 AM IST",
+      "status": "Ticket Ready",
+      "bibNumber": "AIU-SPR-1044",
+      "heatInfo": "Quarter-Final 3 — Lane 5",
+      "category": "200m & 400m Sprint",
+      "isImportant": false
+    }
+  ],
+  "registrations": [
+    {
+      "id": "reg-1",
+      "competitionTitle": "Karnataka State Athletic Selection Trials",
+      "category": "400m Sprint (U-23)",
+      "appliedDate": "Oct 12, 2025",
+      "eventDate": "Oct 28, 2025",
+      "venue": "Kanteerava Outdoor Stadium, Bengaluru",
+      "fee": "₹500 (Paid)",
+      "status": "Confirmed",
+      "bibNumber": "KA-400M-8492",
+      "laneInfo": "Heat 2, Lane 4",
+      "qrCodeSeed": "AFI-KA-8492-OCT28"
+    },
+    {
+      "id": "reg-2",
+      "competitionTitle": "Inter-Zone University Sprint Quarter-Finals",
+      "category": "4x400m Relay & 400m Flat",
+      "appliedDate": "Oct 15, 2025",
+      "eventDate": "Nov 05, 2025",
+      "venue": "Mysore University Track Complex",
+      "fee": "₹350 (Collegiate Sponsor)",
+      "status": "Confirmed",
+      "bibNumber": "AIU-SPR-1044",
+      "laneInfo": "Heat 3, Lane 5",
+      "qrCodeSeed": "AIU-MYS-1044-NOV05"
+    },
+    {
+      "id": "reg-3",
+      "competitionTitle": "Regional Inter-College 400m Relay Selection",
+      "category": "Men Relay 4x400m",
+      "appliedDate": "Oct 20, 2025",
+      "eventDate": "Nov 02, 2025",
+      "venue": "Kanteerava Outer Track, Bengaluru",
+      "fee": "₹300 (Pending Verification)",
+      "status": "Under Review",
+      "laneInfo": "Seeding to be announced",
+      "qrCodeSeed": "BU-RELAY-400-NOV02"
+    },
+    {
+      "id": "reg-4",
+      "competitionTitle": "National Junior Athletics Sprint Meet",
+      "category": "400m Flat (AFI Accreditation)",
+      "appliedDate": "Oct 21, 2025",
+      "eventDate": "Dec 05–08, 2025",
+      "venue": "JLN Stadium, Delhi",
+      "fee": "₹750 (Under Review)",
+      "status": "Under Review",
+      "laneInfo": "Pending AFI National Clearance",
+      "qrCodeSeed": "AFI-NAT-2025-DEC05"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "ach-1",
+      "title": "Gold Medal - All India Inter-University 400m",
+      "year": "2024",
+      "tier": "National",
+      "icon": "military_tech",
+      "verifiedBy": "AIU Sports Federation",
+      "recordStat": "46.82s (PB)",
+      "description": "Gold in collegiate division with electronic photofinish timing recorded by AFI officials."
+    },
+    {
+      "id": "ach-2",
+      "title": "Silver Medal - Karnataka State Athletics Open",
+      "year": "2024",
+      "tier": "State",
+      "icon": "verified",
+      "verifiedBy": "Karnataka Athletic Assoc.",
+      "recordStat": "47.05s",
+      "description": "Runner-up finish in senior men 400m final at Sree Kanteerava Stadium."
+    },
+    {
+      "id": "ach-3",
+      "title": "AFI National Electronic Timing Clearance",
+      "year": "2024",
+      "tier": "National",
+      "icon": "speed",
+      "verifiedBy": "Athletics Federation of India",
+      "recordStat": "46.82s Gate Standard",
+      "description": "Certified sub-47 timing index officially logged in National Scouting Registry."
+    },
+    {
+      "id": "ach-4",
+      "title": "South Zone 4x400m Relay Record Anchor",
+      "year": "2023",
+      "tier": "University",
+      "icon": "bolt",
+      "verifiedBy": "South Zone University Board",
+      "recordStat": "3:08.41 Squad Time",
+      "description": "Split time 45.92s running final anchor leg in university championship victory."
+    },
+    {
+      "id": "ach-5",
+      "title": "State 200m Sprint Gold Standard",
+      "year": "2023",
+      "tier": "State",
+      "icon": "workspace_premium",
+      "verifiedBy": "State Olympic Committee",
+      "recordStat": "21.14s",
+      "description": "Personal best 200m performance with -0.4 m/s legal headwind recorded."
+    },
+    {
+      "id": "ach-6",
+      "title": "Elite Scout Index 94/100 Certification",
+      "year": "2025",
+      "tier": "Special",
+      "icon": "radar",
+      "verifiedBy": "Sports Authority of India (SAI)",
+      "recordStat": "Rank #2 in State U-23",
+      "description": "Ranked in the top 2% of varsity sprinters nationally based on biometric sprint analysis."
+    }
+  ],
+  "splits": [
+    { "segment": "0–100m (Acceleration & Drive)", "time": "11.18s", "speed": "8.94 m/s", "effort": "98%" },
+    { "segment": "100–200m (Transition Pacing)", "time": "11.32s", "speed": "8.83 m/s", "effort": "95%" },
+    { "segment": "200–300m (Backstretch Curve)", "time": "11.72s", "speed": "8.53 m/s", "effort": "94%" },
+    { "segment": "300–400m (Home Stretch Drive)", "time": "12.60s", "speed": "7.94 m/s", "effort": "100%" }
+  ],
+  "progression": [
+    { "meet": "State Trials (May 2024)", "time": "47.90s", "rank": "#4 State" },
+    { "meet": "South Zone Games (Jul 2024)", "time": "47.45s", "rank": "#2 South" },
+    { "meet": "AFI Open Invitational (Aug 2024)", "time": "47.12s", "rank": "#2 State" },
+    { "meet": "All-India Inter-University (Sep 2024)", "time": "46.82s (PB)", "rank": "#1 Gold" }
+  ],
+  "notifications": [
+    {
+      "id": "n-1",
+      "title": "Karnataka State Trials bib pass issued!",
+      "desc": "Your official Heat 2 lane assignment is ready.",
+      "time": "15 mins ago",
+      "type": "verified",
+      "color": "text-blue-600 bg-blue-50 border-blue-100"
+    },
+    {
+      "id": "n-2",
+      "title": "Registration deadline closing in 48 hours",
+      "desc": "Regional 400m Relay has only 6 slots remaining.",
+      "time": "2 hours ago",
+      "type": "alarm",
+      "color": "text-amber-600 bg-amber-50 border-amber-100"
+    },
+    {
+      "id": "n-3",
+      "title": "Sports Authority Scout verified timing",
+      "desc": "Index updated to 94/100 (Elite Varsity Tier).",
+      "time": "5 hours ago",
+      "type": "stars",
+      "color": "text-emerald-600 bg-emerald-50 border-emerald-100"
+    }
+  ]
+}

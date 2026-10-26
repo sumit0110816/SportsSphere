@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ven-1",
+    "name": "Sree Kanteerava Outdoor Stadium",
+    "category": "Athletics & Multi-Sport Complex",
+    "distance": "0.8 km away",
+    "distanceNum": 0.8,
+    "eventsCount": 6,
+    "address": "Kasturba Road, Sampangi Rama Nagara, Bengaluru",
+    "city": "Bengaluru",
+    "latitude": 12.9698,
+    "longitude": 77.5929,
+    "coords": { "x": 38, "y": 46 },
+    "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
+    "features": ["Synthetic 8-Lane 400m Track", "Omega Photofinish Gates", "Floodlit Arena", "Medical Center"]
+  },
+  {
+    "id": "ven-2",
+    "name": "Padukone-Dravid Centre for Sports Excellence",
+    "category": "Badminton & High Performance Center",
+    "distance": "19.8 km away",
+    "distanceNum": 19.8,
+    "eventsCount": 4,
+    "address": "Survey No 336, Bettahalasuru, Jala Hobli, Bengaluru",
+    "city": "Bengaluru",
+    "latitude": 13.1495,
+    "longitude": 77.6256,
+    "coords": { "x": 74, "y": 72 },
+    "image": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=800&q=80",
+    "features": ["16 Air-Conditioned Badminton Courts", "Sports Science Biomechanics Lab", "Olympic Gym", "Recovery Pools"]
+  },
+  {
+    "id": "ven-3",
+    "name": "Bengaluru Football Stadium",
+    "category": "Football Arena",
+    "distance": "2.1 km away",
+    "distanceNum": 2.1,
+    "eventsCount": 3,
+    "address": "Ashok Nagar, Bengaluru",
+    "city": "Bengaluru",
+    "latitude": 12.9688,
+    "longitude": 77.6105,
+    "coords": { "x": 48, "y": 55 },
+    "image": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80",
+    "features": ["FIFA Standard Turf", "15,000 Seating", "Press Box", "Team Locker Rooms"]
+  },
+  {
+    "id": "ven-4",
+    "name": "BAC Aquatic Complex",
+    "category": "Olympic Swimming Facility",
+    "distance": "4.2 km away",
+    "distanceNum": 4.2,
+    "eventsCount": 2,
+    "address": "Sadashivanagar, Bengaluru",
+    "city": "Bengaluru",
+    "latitude": 13.0068,
+    "longitude": 77.5813,
+    "coords": { "x": 30, "y": 32 },
+    "image": "https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&w=800&q=80",
+    "features": ["50m Olympic Racing Pool", "Diving Wells", "Digital Pace Clocks", "Underwater Cameras"]
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "name": "SportSphere - Universal Sports & Talent Platform",
+  "description": "Collegiate and institutional sports management platform for tournaments, rosters, live brackets, and athletic registrations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
