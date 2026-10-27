@@ -86,9 +86,9 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(R * c * 10) / 10;
 }
@@ -100,7 +100,7 @@ export function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border bg-slate-900 text-white text-xs font-semibold animate-slide-up transition-all duration-300 z-50`;
-  
+
   let icon = 'check_circle';
   if (type === 'warn') icon = 'warning';
   if (type === 'error') icon = 'error';
@@ -194,7 +194,7 @@ export function getLoggedInStudent() {
         };
         try {
           localStorage.setItem('sportsphere_student_user', JSON.stringify(studentData));
-        } catch (e) {}
+        } catch (e) { }
         return studentData;
       }
     }
@@ -216,10 +216,13 @@ export function applyLoggedInSessionToProfile(athProfile) {
   p.name = sessionUser.name;
   if (sessionUser.handle) p.handle = sessionUser.handle.replace(/^@/, '');
 
-  if (sessionUser.avatar && sessionUser.avatar.startsWith('http')) {
+  if (sessionUser.avatar && (sessionUser.avatar.startsWith('http') || sessionUser.avatar.startsWith('data:image'))) {
     p.avatar = sessionUser.avatar;
   } else {
     p.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(sessionUser.name)}&background=2563eb&color=fff&size=400&bold=true`;
+  }
+  if (sessionUser.banner) {
+    p.banner = sessionUser.banner;
   }
 
   const sportName = sessionUser.sport || 'Varsity Athletics';
@@ -385,7 +388,7 @@ function handleGPSDetection() {
       };
       updateAllDistances();
       showToast('📍 Live GPS coordinates synced! Distances updated.', 'info');
-      
+
       const citySelect = document.getElementById('location-city-select');
       if (citySelect) {
         citySelect.innerHTML = `<option value="gps" selected>📍 Live GPS (${latitude.toFixed(2)}°N, ${longitude.toFixed(2)}°E)</option>` +
@@ -787,7 +790,7 @@ function getOverviewHTML() {
   `;
 }
 
-function setupOverviewEvents() {}
+function setupOverviewEvents() { }
 
 // ==========================================
 // VIEW: HIGHLIGHTS (SEPARATE SECTION)
@@ -899,7 +902,7 @@ function getHighlightsHTML() {
   `;
 }
 
-function setupHighlightsEvents() {}
+function setupHighlightsEvents() { }
 
 // ==========================================
 // VIEW: PROFILE (SEPARATE LINKEDIN-STYLE SECTION)
@@ -935,8 +938,12 @@ function getProfileHTML() {
               <span class="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white shadow-xs" title="Active on circuit"></span>
             </div>
 
-            <!-- Top Actions: Share CV & PDF -->
+            <!-- Top Actions: Edit Profile, Share CV & PDF -->
             <div class="flex flex-wrap items-center gap-2.5">
+              <button onclick="window.SportSphere.openModal('editProfile')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-base">edit</span>
+                Edit Profile
+              </button>
               <button onclick="window.SportSphere.shareProfileCV()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition-all">
                 <span class="material-symbols-outlined text-base">share</span>
                 Share Sports CV
@@ -1129,7 +1136,7 @@ function getProfileHTML() {
   `;
 }
 
-function setupProfileEvents() {}
+function setupProfileEvents() { }
 
 // ==========================================
 // VIEW: CATEGORIES (SEPARATE DEDICATED SECTION)
@@ -1218,7 +1225,7 @@ function getCategoriesHTML() {
   `;
 }
 
-function setupCategoriesEvents() {}
+function setupCategoriesEvents() { }
 
 // Category click handler
 export function openCategory(categorySlug) {
@@ -1287,7 +1294,7 @@ function getDiscoverHTML() {
   let filtered = state.competitions.filter(comp => {
     const matchesCat = state.selectedCategory === 'all' || comp.category === state.selectedCategory;
     const matchesTier = state.selectedTier === 'all' || comp.circuitTier === state.selectedTier;
-    const matchesSearch = !state.searchQuery || 
+    const matchesSearch = !state.searchQuery ||
       comp.title.toLowerCase().includes(state.searchQuery) ||
       comp.city.toLowerCase().includes(state.searchQuery) ||
       comp.venue.toLowerCase().includes(state.searchQuery) ||
@@ -1511,8 +1518,8 @@ function getMapHTML() {
           <!-- Stadium Pins on Map -->
           <div class="relative z-10 w-full h-[300px] flex items-center justify-center">
             ${state.venues.map(v => {
-              const isSelected = v.id === selectedVenue.id;
-              return `
+    const isSelected = v.id === selectedVenue.id;
+    return `
                 <button onclick="window.SportSphere.selectVenue('${v.id}')" class="absolute transition-all transform hover:scale-125" style="left: ${v.coords.x}%; top: ${v.coords.y}%;">
                   <div class="flex flex-col items-center">
                     <div class="px-2 py-0.5 rounded-md text-[10px] font-bold ${isSelected ? 'bg-blue-500 text-white shadow-lg' : 'bg-slate-800/90 text-slate-300 border border-slate-700'} mb-1 whitespace-nowrap">
@@ -1524,7 +1531,7 @@ function getMapHTML() {
                   </div>
                 </button>
               `;
-            }).join('')}
+  }).join('')}
           </div>
 
           <div class="relative z-10 flex items-center justify-between text-xs text-slate-400">
@@ -1572,7 +1579,7 @@ function getMapHTML() {
   `;
 }
 
-function setupMapEvents() {}
+function setupMapEvents() { }
 
 // ==========================================
 // VIEW: REGISTRATIONS
@@ -1646,7 +1653,7 @@ function getRegistrationsHTML() {
   `;
 }
 
-function setupRegistrationsEvents() {}
+function setupRegistrationsEvents() { }
 
 
 
@@ -1684,15 +1691,15 @@ function getCalendarHTML() {
 
           <div class="grid grid-cols-7 gap-2 text-xs">
             ${Array.from({ length: 31 }, (_, i) => {
-              const day = i + 1;
-              const hasRace = day === 28;
-              return `
+    const day = i + 1;
+    const hasRace = day === 28;
+    return `
                 <div class="h-16 p-1.5 rounded-xl border ${hasRace ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 bg-slate-50'} flex flex-col justify-between text-left">
                   <span class="font-bold ${hasRace ? 'text-blue-600' : 'text-slate-700'}">${day}</span>
                   ${hasRace ? `<span class="text-[9px] bg-blue-600 text-white rounded px-1 py-0.5 font-bold truncate">State Trials</span>` : ''}
                 </div>
               `;
-            }).join('')}
+  }).join('')}
           </div>
         </div>
 
@@ -1715,7 +1722,7 @@ function getCalendarHTML() {
   `;
 }
 
-function setupCalendarEvents() {}
+function setupCalendarEvents() { }
 
 // ==========================================
 // VIEW: ACHIEVEMENTS
@@ -1768,7 +1775,7 @@ function getAchievementsHTML() {
   `;
 }
 
-function setupAchievementsEvents() {}
+function setupAchievementsEvents() { }
 
 // ==========================================
 // VIEW: ANALYTICS
@@ -1824,7 +1831,7 @@ function getAnalyticsHTML() {
   `;
 }
 
-function setupAnalyticsEvents() {}
+function setupAnalyticsEvents() { }
 
 // ==========================================
 // VIEW: SCHOLARSHIPS
@@ -1868,7 +1875,7 @@ function getScholarshipsHTML() {
   `;
 }
 
-function setupScholarshipsEvents() {}
+function setupScholarshipsEvents() { }
 
 // ==========================================
 // VIEW: SAVED
@@ -1903,7 +1910,7 @@ function getSavedHTML() {
   `;
 }
 
-function setupSavedEvents() {}
+function setupSavedEvents() { }
 
 // ==========================================
 // MODAL CONTROLLERS & ACTIONS
@@ -2098,6 +2105,109 @@ export function openModal(type) {
     `;
   } else if (type === 'athleteCv') {
     switchTab('profile');
+  } else if (type === 'editProfile') {
+    const prof = state.athleteProfile?.profile || {};
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in" onclick="if(event.target === this) window.SportSphere.closeModal()">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-slide-up space-y-4 max-h-[92vh] overflow-y-auto">
+          <button onclick="window.SportSphere.closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-xs">
+              <span class="material-symbols-outlined text-2xl">manage_accounts</span>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Profile Management</span>
+              <h2 class="text-lg font-black text-slate-900">Edit Athlete Profile</h2>
+            </div>
+          </div>
+
+          <form onsubmit="window.SportSphere.handleProfileEditSubmit(event)" class="space-y-3.5 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Full Name</label>
+                <input type="text" id="edit-name" value="${prof.name || ''}" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Athlete Handle</label>
+                <input type="text" id="edit-handle" value="${prof.handle ? ('@' + prof.handle.replace(/^@/, '')) : '@athlete'}" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Headline / Specialization</label>
+              <input type="text" id="edit-headline" value="${prof.headline || ''}" placeholder="e.g. 400m Sprinter • Varsity Athlete • All-India Medallist" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">University / Academy</label>
+                <input type="text" id="edit-institution" value="${prof.institution || ''}" placeholder="e.g. Jain College of Engineering" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Location / City</label>
+                <input type="text" id="edit-location" value="${prof.location || ''}" placeholder="e.g. Bengaluru, Karnataka, India" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Bio / Athletic Journey</label>
+              <textarea id="edit-bio" rows="3" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">${prof.about || prof.bio || ''}</textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Email Address</label>
+                <input type="email" id="edit-email" value="${prof.email || ''}" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Phone / WhatsApp</label>
+                <input type="text" id="edit-phone" value="${prof.phone || ''}" placeholder="+91 98765 43210" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+
+            <!-- Avatar & Banner Options -->
+            <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
+              <span class="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">Profile Images (Avatar & Banner)</span>
+              
+              <div>
+                <label class="block font-semibold text-slate-600 text-[11px] mb-1">Avatar Photo (URL or Upload from Device)</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="edit-avatar" value="${prof.avatar || ''}" placeholder="Image URL or browse file" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white" />
+                  <label class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold cursor-pointer shrink-0">
+                    Browse
+                    <input type="file" accept="image/*" class="hidden" onchange="window.SportSphere.handleAvatarFileSelect(event)" />
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-600 text-[11px] mb-1">Cover Banner (URL or Upload from Device)</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="edit-banner" value="${prof.banner || ''}" placeholder="Banner Image URL" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white" />
+                  <label class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold cursor-pointer shrink-0">
+                    Browse
+                    <input type="file" accept="image/*" class="hidden" onchange="window.SportSphere.handleBannerFileSelect(event)" />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <button type="button" onclick="window.SportSphere.closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+                Cancel
+              </button>
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md flex items-center gap-1.5 transition-transform hover:scale-102">
+                <span class="material-symbols-outlined text-sm">save</span>
+                Save Profile Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
   } else if (type === 'trialTime') {
     modalContainer.innerHTML = `
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in">
@@ -2231,6 +2341,103 @@ export async function handleBiometricUploadSubmit() {
   const result = await SportSphereAPI.uploadSprintBiometrics({ timestamp: Date.now() });
   closeModal();
   showToast(result.message, 'info');
+}
+
+export function handleAvatarFileSelect(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const avatarInput = document.getElementById('edit-avatar');
+    if (avatarInput) avatarInput.value = evt.target.result;
+    showToast(`Avatar selected: ${file.name}`, 'info');
+  };
+  reader.readAsDataURL(file);
+}
+
+export function handleBannerFileSelect(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const bannerInput = document.getElementById('edit-banner');
+    if (bannerInput) bannerInput.value = evt.target.result;
+    showToast(`Banner selected: ${file.name}`, 'info');
+  };
+  reader.readAsDataURL(file);
+}
+
+export function handleProfileEditSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('edit-name')?.value?.trim();
+  const handle = document.getElementById('edit-handle')?.value?.trim();
+  const headline = document.getElementById('edit-headline')?.value?.trim();
+  const institution = document.getElementById('edit-institution')?.value?.trim();
+  const location = document.getElementById('edit-location')?.value?.trim();
+  const bio = document.getElementById('edit-bio')?.value?.trim();
+  const email = document.getElementById('edit-email')?.value?.trim();
+  const phone = document.getElementById('edit-phone')?.value?.trim();
+  const avatar = document.getElementById('edit-avatar')?.value?.trim();
+  const banner = document.getElementById('edit-banner')?.value?.trim();
+
+  if (!name) {
+    showToast('Name cannot be empty', 'error');
+    return;
+  }
+
+  // Update in-memory state
+  if (!state.athleteProfile) state.athleteProfile = { profile: {} };
+  if (!state.athleteProfile.profile) state.athleteProfile.profile = {};
+
+  const p = state.athleteProfile.profile;
+  p.name = name;
+  if (handle) p.handle = handle.replace(/^@/, '');
+  if (headline) p.headline = headline;
+  if (institution) p.institution = institution;
+  if (location) p.location = location;
+  if (bio) { p.bio = bio; p.about = bio; }
+  if (email) p.email = email;
+  if (phone) p.phone = phone;
+  if (avatar) p.avatar = avatar;
+  if (banner) p.banner = banner;
+
+  // Persist to localStorage
+  const studentUser = {
+    name,
+    email: email || '',
+    handle: handle || '@' + name.toLowerCase().replace(/\s+/g, '_'),
+    sport: headline || 'Athletics',
+    city: location || '',
+    avatar: avatar || p.avatar || '',
+    banner: banner || p.banner || '',
+    bio: bio || '',
+    title: headline || 'Student Athlete'
+  };
+  try {
+    localStorage.setItem('sportsphere_student_user', JSON.stringify(studentUser));
+  } catch {}
+
+  // Also update sportsphere_auth_user
+  try {
+    const authData = localStorage.getItem('sportsphere_auth_user');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      parsed.name = name;
+      if (email) parsed.email = email;
+      if (!parsed.profile) parsed.profile = {};
+      parsed.profile.fullName = name;
+      parsed.profile.institution = institution;
+      parsed.profile.city = location;
+      parsed.profile.bio = bio;
+      if (avatar) parsed.profile.avatar = avatar;
+      localStorage.setItem('sportsphere_auth_user', JSON.stringify(parsed));
+    }
+  } catch {}
+
+  closeModal();
+  renderHeaderProfile();
+  renderActiveTab();
+  showToast('🎉 Athlete profile updated and saved permanently!', 'info');
 }
 
 // Bookmark Toggle
@@ -2600,7 +2807,10 @@ window.SportSphere = {
   closeSidebar,
   toggleSidebar,
   renderSidebar,
-  handleLogout
+  handleLogout,
+  handleProfileEditSubmit,
+  handleAvatarFileSelect,
+  handleBannerFileSelect
 };
 
 // Start application when DOM is ready

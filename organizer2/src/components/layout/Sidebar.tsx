@@ -46,7 +46,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpenOnMobile = false,
   onCloseMobile,
 }) => {
-  const organizer = getLoggedInOrganizer();
+  const [organizer, setOrganizer] = React.useState(() => getLoggedInOrganizer());
+  React.useEffect(() => {
+    const handleUpdate = () => setOrganizer(getLoggedInOrganizer());
+    window.addEventListener('organizer-profile-updated', handleUpdate);
+    return () => window.removeEventListener('organizer-profile-updated', handleUpdate);
+  }, []);
   const navItems: NavItemConfig[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'events', label: 'My Events', icon: Calendar },

@@ -30,7 +30,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
 }) => {
-  const coach = getLoggedInCoach();
+  const [coach, setCoach] = React.useState(() => getLoggedInCoach());
+  React.useEffect(() => {
+    const handleUpdate = () => setCoach(getLoggedInCoach());
+    window.addEventListener('coach-profile-updated', handleUpdate);
+    return () => window.removeEventListener('coach-profile-updated', handleUpdate);
+  }, []);
   const coachInitials = coach.name
     .split(' ')
     .filter(Boolean)

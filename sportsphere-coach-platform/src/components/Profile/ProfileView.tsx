@@ -69,7 +69,86 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   onOpenVideo,
   onNavigate,
 }) => {
-  const coach = getLoggedInCoach();
+  const [coach, setCoach] = useState(() => getLoggedInCoach());
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState(coach.name);
+  const [editTitle, setEditTitle] = useState(coach.title);
+  const [editAcademy, setEditAcademy] = useState(coach.academy);
+  const [editSport, setEditSport] = useState(coach.sport);
+  const [editCity, setEditCity] = useState(coach.city);
+  const [editBio, setEditBio] = useState(coach.bio);
+  const [editEmail, setEditEmail] = useState(coach.email);
+  const [editAvatar, setEditAvatar] = useState(coach.avatar);
+
+  const openEditModal = () => {
+    setEditName(coach.name);
+    setEditTitle(coach.title);
+    setEditAcademy(coach.academy);
+    setEditSport(coach.sport);
+    setEditCity(coach.city);
+    setEditBio(coach.bio);
+    setEditEmail(coach.email);
+    setEditAvatar(coach.avatar);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editName.trim()) {
+      onShowToast('Name Required', 'Please enter your coach name', 'warning');
+      return;
+    }
+    const updated = {
+      ...coach,
+      name: editName.trim(),
+      title: editTitle.trim(),
+      academy: editAcademy.trim(),
+      sport: editSport.trim(),
+      city: editCity.trim(),
+      bio: editBio.trim(),
+      email: editEmail.trim(),
+      avatar: editAvatar.trim(),
+    };
+    try {
+      localStorage.setItem('sportsphere_coach_user', JSON.stringify(updated));
+    } catch {}
+
+    try {
+      const authStr = localStorage.getItem('sportsphere_auth_user');
+      if (authStr) {
+        const parsed = JSON.parse(authStr);
+        parsed.name = updated.name;
+        if (updated.email) parsed.email = updated.email;
+        if (!parsed.profile) parsed.profile = {};
+        parsed.profile.fullName = updated.name;
+        parsed.profile.currentAcademy = updated.academy;
+        parsed.profile.specialization = updated.sport;
+        parsed.profile.city = updated.city;
+        parsed.profile.bio = updated.bio;
+        if (updated.avatar) parsed.profile.avatar = updated.avatar;
+        localStorage.setItem('sportsphere_auth_user', JSON.stringify(parsed));
+      }
+    } catch {}
+
+    setCoach(updated);
+    window.dispatchEvent(new Event('coach-profile-updated'));
+    setIsEditModalOpen(false);
+    onShowToast('Profile Saved', 'Your coach profile details have been updated successfully', 'success');
+  };
+
+  const handleAvatarFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (evt.target?.result) {
+        setEditAvatar(evt.target.result as string);
+        onShowToast('Image Selected', file.name, 'info');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const coachInitials = coach.name
     .split(' ')
     .filter(Boolean)
@@ -263,9 +342,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/15 via-transparent to-black/30" />
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <button
-              onClick={() => onShowToast('Cover Updated', 'Profile banner customized', 'info')}
-              className="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors"
-              title="Edit cover photo"
+              onClick={openEditModal}
+              className="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors cursor-pointer"
+              title="Edit profile & photo"
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -294,18 +373,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             {/* Quick Edit button */}
             <div className="flex items-center gap-2">
               <button
-                onClick={handleShareProfile}
-                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
-                title="Share profile"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => onShowToast('Profile Settings', 'Coach credential verification is active', 'info')}
-                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
+                onClick={openEditModal}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
                 title="Edit profile"
               >
                 <Edit3 className="w-4 h-4" />
+                <span>Edit Profile</span>
+              </button>
+              <button
+                onClick={handleShareProfile}
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                title="Share profile"
+              >
+                <Share2 className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -420,8 +500,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               </p>
             </div>
             <button
-              onClick={() => onShowToast('Scouting Preferences', 'Updated coach availability tags', 'info')}
-              className="p-1 rounded text-slate-400 hover:text-slate-700"
+              onClick={openEditModal}
+              className="p-1 rounded text-slate-400 hover:text-slate-700 cursor-pointer"
+              title="Edit coaching details"
             >
               <Edit3 className="w-4 h-4" />
             </button>
@@ -994,6 +1075,171 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   <span>Post Highlight</span>
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Coach Edit Profile Modal */}
+        {isEditModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEditModalOpen(false)}
+              className="fixed inset-0 bg-[#0F172A]/70 backdrop-blur-sm"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              className="relative w-full max-w-xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 z-10 space-y-4 max-h-[92vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                    <Edit3 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-['Plus_Jakarta_Sans'] font-extrabold text-base text-slate-900">
+                      Edit Coach Profile
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Update your verified credentials, academy, and scouting parameters
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveProfile} className="space-y-3.5 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600 font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Title / Designation</label>
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="e.g. Head Performance Director"
+                      required
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Academy / Organization</label>
+                    <input
+                      type="text"
+                      value={editAcademy}
+                      onChange={(e) => setEditAcademy(e.target.value)}
+                      placeholder="e.g. High Performance Academy"
+                      required
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Primary Sport</label>
+                    <input
+                      type="text"
+                      value={editSport}
+                      onChange={(e) => setEditSport(e.target.value)}
+                      placeholder="e.g. Athletics & Tactical Coaching"
+                      required
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">City / Region Hub</label>
+                    <input
+                      type="text"
+                      value={editCity}
+                      onChange={(e) => setEditCity(e.target.value)}
+                      placeholder="e.g. Regional Sports Hub"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Official Email</label>
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      placeholder="coach@sportsphere.org"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Bio &amp; Coaching Philosophy</label>
+                  <textarea
+                    rows={3}
+                    value={editBio}
+                    onChange={(e) => setEditBio(e.target.value)}
+                    placeholder="Describe your coaching methodology, past achievements, or scouting focus..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+
+                {/* Avatar Selection */}
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+                  <label className="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+                    Profile Avatar (Photo URL or Device Upload)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editAvatar}
+                      onChange={(e) => setEditAvatar(e.target.value)}
+                      placeholder="https://... or choose local file"
+                      className="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                    />
+                    <label className="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold cursor-pointer shrink-0">
+                      Browse
+                      <input type="file" accept="image/*" className="hidden" onChange={handleAvatarFileSelect} />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="py-2.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold font-['Plus_Jakarta_Sans'] flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Save Coach Profile</span>
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

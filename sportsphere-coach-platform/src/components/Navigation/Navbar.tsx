@@ -20,7 +20,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNotifications,
   unreadCount = 2,
 }) => {
-  const coach = getLoggedInCoach();
+  const [coach, setCoach] = React.useState(() => getLoggedInCoach());
+  React.useEffect(() => {
+    const handleUpdate = () => setCoach(getLoggedInCoach());
+    window.addEventListener('coach-profile-updated', handleUpdate);
+    return () => window.removeEventListener('coach-profile-updated', handleUpdate);
+  }, []);
   const initials = coach.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'CP';
   const navItems: { key: TabView; label: string }[] = [
     { key: 'overview', label: 'Overview' },

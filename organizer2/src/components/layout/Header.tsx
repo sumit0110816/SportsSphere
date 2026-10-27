@@ -41,7 +41,12 @@ export const Header: React.FC<HeaderProps> = ({
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(true);
-  const organizer = getLoggedInOrganizer();
+  const [organizer, setOrganizer] = useState(() => getLoggedInOrganizer());
+  useEffect(() => {
+    const handleUpdate = () => setOrganizer(getLoggedInOrganizer());
+    window.addEventListener('organizer-profile-updated', handleUpdate);
+    return () => window.removeEventListener('organizer-profile-updated', handleUpdate);
+  }, []);
   const organizerInitials = organizer.name
     .split(' ')
     .filter(Boolean)
