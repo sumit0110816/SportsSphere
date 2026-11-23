@@ -4,6 +4,7 @@
  */
 
 import { SportSphereAPI } from './api.js';
+import { getCloudinaryConfig, saveCloudinaryConfig, uploadVideoToCloudinary } from './cloudinary.js';
 
 // Global Application State
 const state = {
@@ -238,19 +239,25 @@ export function applyLoggedInSessionToProfile(athProfile) {
     ? sessionUser.bio
     : `Competitive ${sportName} student athlete representing ${orgName}. Actively training and competing in championship trials.`;
 
-  if (athProfile.experience && Array.isArray(athProfile.experience)) {
-    if (athProfile.experience[0]) {
+  try {
+    const savedExp = localStorage.getItem('sportsphere_student_experience');
+    if (savedExp) {
+      athProfile.experience = JSON.parse(savedExp);
+    } else if (athProfile.experience && Array.isArray(athProfile.experience) && athProfile.experience[0]) {
       athProfile.experience[0].role = `Team Athlete • ${sportName}`;
       athProfile.experience[0].organization = orgName;
       athProfile.experience[0].location = cityName;
     }
-  }
+  } catch {}
 
-  if (athProfile.education && Array.isArray(athProfile.education)) {
-    if (athProfile.education[0]) {
+  try {
+    const savedEdu = localStorage.getItem('sportsphere_student_education');
+    if (savedEdu) {
+      athProfile.education = JSON.parse(savedEdu);
+    } else if (athProfile.education && Array.isArray(athProfile.education) && athProfile.education[0]) {
       athProfile.education[0].institution = orgName;
     }
-  }
+  } catch {}
 
   if (athProfile.recommendations && Array.isArray(athProfile.recommendations)) {
     athProfile.recommendations.forEach((rec) => {
@@ -810,10 +817,16 @@ function getHighlightsHTML() {
           <p class="text-xs text-slate-500 mt-1">Watch verified race finishes, jump smashes, and training clips shared by varsity athletes.</p>
         </div>
 
-        <button onclick="window.SportSphere.openModal('postHighlight')" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-transform hover:scale-105">
-          <span class="material-symbols-outlined text-base">add_circle</span>
-          Post New Highlight
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="window.SportSphere.openModal('cloudinarySettings')" class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors cursor-pointer" title="Configure Cloudinary Account">
+            <span class="material-symbols-outlined text-base text-blue-600">cloud</span>
+            <span>Cloudinary Config</span>
+          </button>
+          <button onclick="window.SportSphere.openModal('postHighlight')" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-transform hover:scale-105 cursor-pointer">
+            <span class="material-symbols-outlined text-base">add_circle</span>
+            <span>Post New Highlight</span>
+          </button>
+        </div>
       </div>
 
       <!-- Highlights Feed -->
@@ -924,8 +937,9 @@ function getProfileHTML() {
         <div class="h-48 sm:h-64 bg-cover bg-center relative" style="background-image: url('${profile.banner || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1600&q=80'}');">
           <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent"></div>
           
-          <button onclick="window.SportSphere.showToast('Banner upload modal opened')" class="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white text-slate-700 shadow-md backdrop-blur-md">
-            <span class="material-symbols-outlined text-base">photo_camera</span>
+          <button onclick="window.SportSphere.openModal('editProfile')" class="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-black/50 hover:bg-black/70 text-white shadow-md backdrop-blur-md flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-colors" title="Change Cover Banner & Profile">
+            <span class="material-symbols-outlined text-sm">photo_camera</span>
+            <span class="hidden sm:inline text-[11px]">Edit Banner</span>
           </button>
         </div>
 
@@ -1036,7 +1050,13 @@ function getProfileHTML() {
 
       <!-- ABOUT SECTION -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-3">
-        <h2 class="text-lg font-black text-slate-900">About & Athletic Summary</h2>
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-black text-slate-900">About & Athletic Summary</h2>
+          <button onclick="window.SportSphere.openModal('editAbout')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-all cursor-pointer border border-blue-200 shadow-2xs" title="Edit About Summary">
+            <span class="material-symbols-outlined text-base">edit</span>
+            <span>Edit Summary</span>
+          </button>
+        </div>
         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
           ${profile.bio}
         </p>
@@ -1045,18 +1065,39 @@ function getProfileHTML() {
       <!-- ATHLETIC CAREER & EXPERIENCE -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-black text-slate-900">Athletic Career & Leadership Experience</h2>
-          <span class="text-xs text-blue-600 font-bold">${experiences.length} Positions</span>
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-black text-slate-900">Athletic Career & Leadership Experience</h2>
+            <span class="text-xs text-blue-600 font-bold">(${experiences.length} Positions)</span>
+          </div>
+          <button onclick="window.SportSphere.openModal('addExperience')" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-all cursor-pointer border border-blue-200 shadow-2xs">
+            <span class="material-symbols-outlined text-base">add</span>
+            Add Position
+          </button>
         </div>
 
-        <div class="space-y-6">
-          ${experiences.map(exp => `
-            <div class="flex gap-4">
+        <div class="space-y-4">
+          ${experiences.length === 0 ? `
+            <div class="p-6 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl">
+              <span class="material-symbols-outlined text-3xl mb-1">sports_score</span>
+              <p class="text-xs font-semibold">No career positions added yet. Click "Add Position" above to add your team leadership or club history.</p>
+            </div>
+          ` : experiences.map((exp, idx) => `
+            <div class="flex gap-4 p-3.5 rounded-2xl hover:bg-slate-50 transition-colors group relative border border-transparent hover:border-slate-100">
               <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
                 <span class="material-symbols-outlined text-2xl">sports_score</span>
               </div>
-              <div class="space-y-1">
-                <h3 class="text-sm font-bold text-slate-900">${exp.role}</h3>
+              <div class="space-y-1 flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <h3 class="text-sm font-bold text-slate-900">${exp.role}</h3>
+                  <div class="flex items-center gap-1">
+                    <button onclick="window.SportSphere.openModal('editExperience', '${exp.id || idx}')" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-blue-600 transition-colors cursor-pointer" title="Edit Position">
+                      <span class="material-symbols-outlined text-base">edit</span>
+                    </button>
+                    <button onclick="window.SportSphere.deleteExperience('${exp.id || idx}')" class="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors cursor-pointer" title="Delete Position">
+                      <span class="material-symbols-outlined text-base">delete</span>
+                    </button>
+                  </div>
+                </div>
                 <p class="text-xs font-semibold text-slate-700">${exp.organization}</p>
                 <p class="text-[11px] text-slate-400 font-medium">${exp.duration} • ${exp.location}</p>
                 <p class="text-xs text-slate-600 pt-1 leading-relaxed">${exp.description}</p>
@@ -1068,18 +1109,43 @@ function getProfileHTML() {
 
       <!-- EDUCATION SECTION -->
       <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
-        <h2 class="text-lg font-black text-slate-900">Education & Academic Record</h2>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-black text-slate-900">Education & Academic Record</h2>
+            <span class="text-xs text-indigo-600 font-bold">(${educations.length} Degrees)</span>
+          </div>
+          <button onclick="window.SportSphere.openModal('addEducation')" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-all cursor-pointer border border-indigo-200 shadow-2xs">
+            <span class="material-symbols-outlined text-base">add</span>
+            Add Education
+          </button>
+        </div>
+
         <div class="space-y-4">
-          ${educations.map(edu => `
-            <div class="flex gap-4">
+          ${educations.length === 0 ? `
+            <div class="p-6 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl">
+              <span class="material-symbols-outlined text-3xl mb-1">school</span>
+              <p class="text-xs font-semibold">No academic degrees added yet. Click "Add Education" above.</p>
+            </div>
+          ` : educations.map((edu, idx) => `
+            <div class="flex gap-4 p-3.5 rounded-2xl hover:bg-slate-50 transition-colors group relative border border-transparent hover:border-slate-100">
               <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
                 <span class="material-symbols-outlined text-2xl">school</span>
               </div>
-              <div class="space-y-1">
-                <h3 class="text-sm font-bold text-slate-900">${edu.degree}</h3>
+              <div class="space-y-1 flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <h3 class="text-sm font-bold text-slate-900">${edu.degree}</h3>
+                  <div class="flex items-center gap-1">
+                    <button onclick="window.SportSphere.openModal('editEducation', '${edu.id || idx}')" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-indigo-600 transition-colors cursor-pointer" title="Edit Education">
+                      <span class="material-symbols-outlined text-base">edit</span>
+                    </button>
+                    <button onclick="window.SportSphere.deleteEducation('${edu.id || idx}')" class="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors cursor-pointer" title="Delete Education">
+                      <span class="material-symbols-outlined text-base">delete</span>
+                    </button>
+                  </div>
+                </div>
                 <p class="text-xs font-semibold text-slate-700">${edu.institution}</p>
-                <p class="text-[11px] text-slate-400">${edu.duration} • ${edu.grade}</p>
-                <p class="text-xs text-slate-600 pt-1">${edu.activities}</p>
+                <p class="text-[11px] text-slate-400 font-medium">${edu.duration} • ${edu.grade}</p>
+                <p class="text-xs text-slate-600 pt-1 leading-relaxed">${edu.activities || edu.description || ''}</p>
               </div>
             </div>
           `).join('')}
@@ -1276,7 +1342,76 @@ export function shareHighlight(hlId) {
 }
 
 export function playHighlightMedia(hlId) {
-  showToast('Playing full high-resolution photofinish reel in full-screen player', 'info');
+  const hl = (state.highlights || []).find(h => h.id === hlId) || state.highlights?.[0];
+  if (!hl) return;
+
+  const modalContainer = document.getElementById('modal-container');
+  if (!modalContainer) return;
+
+  const isVideo = hl.mediaUrl && (hl.mediaUrl.endsWith('.mp4') || hl.mediaUrl.endsWith('.webm') || hl.mediaUrl.includes('cloudinary') || hl.mediaUrl.includes('video') || hl.mediaType === 'video');
+
+  modalContainer.innerHTML = `
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-fade-in" onclick="if(event.target === this) window.SportSphere.closeModal()">
+      <div class="relative w-full max-w-3xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-700/80 text-white flex flex-col max-h-[92vh]">
+        {/* Top Video Header */}
+        <div class="flex items-center justify-between px-5 py-3.5 bg-slate-950/90 border-b border-slate-800">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-emerald-600 text-white">
+              Cloudinary Video Reel
+            </span>
+            <span class="text-sm font-bold truncate text-slate-100">
+              ${hl.title}
+            </span>
+          </div>
+          <button onclick="window.SportSphere.closeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-xl">close</span>
+          </button>
+        </div>
+
+        {/* Video Canvas */}
+        <div class="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
+          ${isVideo ? `
+            <video src="${hl.mediaUrl}" controls autoplay playsinline class="w-full h-full object-contain" poster="${hl.mediaUrl.replace(/\\.[^/.]+$/, '.jpg')}">
+              Your browser does not support HTML5 video playback.
+            </video>
+          ` : `
+            <img src="${hl.mediaUrl}" alt="${hl.title}" class="w-full h-full object-cover" />
+            <div class="absolute bottom-4 left-4 flex items-center gap-2">
+              <span class="px-3 py-1 rounded-xl bg-slate-900/90 backdrop-blur-md text-white text-xs font-bold border border-white/20">
+                ⚡ ${hl.stats?.timing || '46.82s'}
+              </span>
+              <span class="px-3 py-1 rounded-xl bg-slate-900/90 backdrop-blur-md text-slate-300 text-xs font-medium border border-white/20">
+                ${hl.stats?.splitTime || 'Split 4: 12.60s'}
+              </span>
+            </div>
+          `}
+        </div>
+
+        {/* Video Metadata & Actions */}
+        <div class="p-5 bg-slate-900 space-y-3 overflow-y-auto">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img src="${hl.author.avatar}" alt="${hl.author.name}" class="w-10 h-10 rounded-xl object-cover border border-emerald-500" />
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>${hl.author.name}</span>
+                  <span class="text-[10px] text-emerald-400 font-semibold">• ${hl.sport}</span>
+                </div>
+                <div class="text-[11px] text-slate-400">${hl.author.role} • ${hl.timestamp}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="window.SportSphere.likeHighlight('${hl.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold cursor-pointer transition-colors ${hl.hasLiked ? 'text-red-400' : 'text-slate-300'}">
+                <span class="material-symbols-outlined text-base ${hl.hasLiked ? 'material-symbols-fill text-red-500' : ''}">favorite</span>
+                <span>${hl.likes}</span>
+              </button>
+            </div>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">${hl.caption}</p>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 export function openHighlightComments(hlId) {
@@ -2030,15 +2165,184 @@ export async function handleRegistrationSubmit(e) {
 }
 
 // Open General Modals
-export function openModal(type) {
+export function openModal(type, targetId = null) {
   const modalContainer = document.getElementById('modal-container');
   if (!modalContainer) return;
 
-  if (type === 'postHighlight') {
+  if (type === 'editAbout') {
+    const currentBio = state.athleteProfile?.profile?.bio || '';
     modalContainer.innerHTML = `
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in">
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in" onclick="if(event.target === this) window.SportSphere.closeModal()">
         <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-slide-up space-y-4 max-h-[90vh] overflow-y-auto">
-          <button onclick="window.SportSphere.closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700">
+          <button onclick="window.SportSphere.closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
+              <span class="material-symbols-outlined text-2xl">description</span>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Profile Overview</span>
+              <h2 class="text-lg font-black text-slate-900">Edit About &amp; Athletic Summary</h2>
+            </div>
+          </div>
+
+          <form onsubmit="window.SportSphere.handleAboutSubmit(event)" class="space-y-4 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">About &amp; Athletic Journey</label>
+              <textarea id="edit-about-bio" rows="6" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-normal leading-relaxed" placeholder="Describe your athletic background, training routines, championships, and athletic goals..." required>${currentBio}</textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <button type="button" onclick="window.SportSphere.closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+                Cancel
+              </button>
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md flex items-center gap-1.5 transition-transform hover:scale-102">
+                <span class="material-symbols-outlined text-sm">save</span>
+                Save Summary
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  } else if (type === 'addExperience' || type === 'editExperience') {
+    const exps = state.athleteProfile?.experience || [];
+    let existing = null;
+    if (type === 'editExperience' && targetId !== null) {
+      existing = exps.find(e => (e.id === targetId || String(e.id) === String(targetId))) || exps[Number(targetId)] || null;
+    }
+    const isEdit = !!existing;
+
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in" onclick="if(event.target === this) window.SportSphere.closeModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-slide-up space-y-4 max-h-[92vh] overflow-y-auto">
+          <button onclick="window.SportSphere.closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
+              <span class="material-symbols-outlined text-2xl">sports_score</span>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Career &amp; Leadership</span>
+              <h2 class="text-lg font-black text-slate-900">${isEdit ? 'Edit Athletic Position' : 'Add Athletic Position'}</h2>
+            </div>
+          </div>
+
+          <form onsubmit="window.SportSphere.handleExperienceSubmit(event, '${targetId !== null ? targetId : ''}')" class="space-y-3.5 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Role / Position Title</label>
+              <input type="text" id="exp-role" value="${existing?.role || ''}" placeholder="e.g. Team Captain &amp; Anchor Leg (4x400m)" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold" />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Sports Organization / Club / Varsity</label>
+              <input type="text" id="exp-org" value="${existing?.organization || ''}" placeholder="e.g. University Track Squad / State Athletics Association" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Duration / Time Period</label>
+                <input type="text" id="exp-dur" value="${existing?.duration || ''}" placeholder="e.g. Jul 2023 – Present • 2 yrs" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Location / Stadium</label>
+                <input type="text" id="exp-loc" value="${existing?.location || ''}" placeholder="e.g. Bengaluru, India" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Description / Key Achievements</label>
+              <textarea id="exp-desc" rows="3" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-normal leading-relaxed" placeholder="Describe your duties, team leadership, tournament medals, and split velocities...">${existing?.description || ''}</textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <button type="button" onclick="window.SportSphere.closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+                Cancel
+              </button>
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md flex items-center gap-1.5 transition-transform hover:scale-102">
+                <span class="material-symbols-outlined text-sm">save</span>
+                ${isEdit ? 'Save Changes' : 'Add Position'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  } else if (type === 'addEducation' || type === 'editEducation') {
+    const edus = state.athleteProfile?.education || [];
+    let existing = null;
+    if (type === 'editEducation' && targetId !== null) {
+      existing = edus.find(e => (e.id === targetId || String(e.id) === String(targetId))) || edus[Number(targetId)] || null;
+    }
+    const isEdit = !!existing;
+
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in" onclick="if(event.target === this) window.SportSphere.closeModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-slide-up space-y-4 max-h-[92vh] overflow-y-auto">
+          <button onclick="window.SportSphere.closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-xs">
+              <span class="material-symbols-outlined text-2xl">school</span>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Academic History</span>
+              <h2 class="text-lg font-black text-slate-900">${isEdit ? 'Edit Academic Record' : 'Add Academic Degree'}</h2>
+            </div>
+          </div>
+
+          <form onsubmit="window.SportSphere.handleEducationSubmit(event, '${targetId !== null ? targetId : ''}')" class="space-y-3.5 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Degree / Course</label>
+              <input type="text" id="edu-degree" value="${existing?.degree || ''}" placeholder="e.g. Bachelor of Physical Education (B.P.Ed)" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">College / University / School</label>
+              <input type="text" id="edu-inst" value="${existing?.institution || ''}" placeholder="e.g. National Sports University" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Duration / Years</label>
+                <input type="text" id="edu-dur" value="${existing?.duration || ''}" placeholder="e.g. 2021 – 2024" required class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Grade / CGPA</label>
+                <input type="text" id="edu-grade" value="${existing?.grade || ''}" placeholder="e.g. CGPA: 8.8 / 10.0" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Activities &amp; Societies</label>
+              <textarea id="edu-desc" rows="3" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-normal leading-relaxed" placeholder="Varsity Athletic Captain, Intra-collegiate Sports Representative...">${existing?.activities || existing?.description || ''}</textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <button type="button" onclick="window.SportSphere.closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+                Cancel
+              </button>
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md flex items-center gap-1.5 transition-transform hover:scale-102">
+                <span class="material-symbols-outlined text-sm">save</span>
+                ${isEdit ? 'Save Changes' : 'Add Degree'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  } else if (type === 'postHighlight') {
+    const cldConfig = getCloudinaryConfig();
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in" onclick="if(event.target === this) window.SportSphere.closeModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-slide-up space-y-4 max-h-[90vh] overflow-y-auto">
+          <button onclick="window.SportSphere.closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer">
             <span class="material-symbols-outlined">close</span>
           </button>
 
@@ -2047,7 +2351,7 @@ export function openModal(type) {
               <span class="material-symbols-outlined text-2xl">video_call</span>
             </div>
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Athlete Network</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Cloudinary Media Storage</span>
               <h2 class="text-lg font-black text-slate-900">Post New Athletic Highlight</h2>
             </div>
           </div>
@@ -2070,14 +2374,47 @@ export function openModal(type) {
               </select>
             </div>
 
+            <!-- Direct Cloudinary Video Uploader Dropzone -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                  <span class="material-symbols-outlined text-blue-600 text-base">cloud_upload</span>
+                  <span>Cloudinary Video Upload</span>
+                </div>
+                <button type="button" onclick="window.SportSphere.openModal('cloudinarySettings')" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 underline cursor-pointer">
+                  Cloud: ${cldConfig.cloudName} ⚙️
+                </button>
+              </div>
+
+              <div class="p-4 border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl text-center cursor-pointer bg-white transition-all group" onclick="document.getElementById('hl-video-file-input').click()">
+                <span class="material-symbols-outlined text-2xl text-slate-400 group-hover:text-blue-600 group-hover:scale-110 transition-transform">video_library</span>
+                <p class="text-xs font-bold text-slate-700 mt-1">Select Video / Highlight Clip</p>
+                <p class="text-[10px] text-slate-400">Directly uploads to Cloudinary via Fetch API (.mp4, .mov, .webm)</p>
+                <input type="file" id="hl-video-file-input" accept="video/*,image/*" class="hidden" onchange="window.SportSphere.handleCloudinaryVideoUpload(event)" />
+              </div>
+
+              <!-- Upload Progress -->
+              <div id="cloudinary-progress-box" class="hidden space-y-1">
+                <div class="flex items-center justify-between text-[11px] font-bold text-slate-600">
+                  <span id="cloudinary-progress-label">Uploading to Cloudinary...</span>
+                  <span id="cloudinary-progress-pct" class="text-blue-600">0%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div id="cloudinary-progress-bar" class="h-full bg-blue-600 transition-all duration-200 rounded-full" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <div id="hl-media-preview-box"></div>
+            </div>
+
             <div>
               <label class="block font-bold text-slate-700 mb-1">Caption & Training Context</label>
-              <textarea id="hl-caption" rows="3" placeholder="Share workout details, split velocities, or tournament match context..." required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+              <textarea id="hl-caption" rows="2" placeholder="Share workout details, split velocities, or tournament match context..." required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Key Verified Stat (e.g. PB / Split)</label>
+                <label class="block font-bold text-slate-700 mb-1">Key Verified Stat</label>
                 <input type="text" id="hl-stat-timing" placeholder="e.g. 46.82s (PB)" class="w-full px-3 py-2 rounded-xl border border-slate-200" />
               </div>
               <div>
@@ -2087,16 +2424,70 @@ export function openModal(type) {
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Media URL or Upload Preview</label>
-              <input type="text" id="hl-media-url" value="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80" class="w-full px-3 py-2 rounded-xl border border-slate-200" />
+              <label class="block font-bold text-slate-700 mb-1">Media URL (Auto-filled by Cloudinary)</label>
+              <input type="text" id="hl-media-url" value="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-600" />
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-2">
-              <button type="button" onclick="window.SportSphere.closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+              <button type="button" onclick="window.SportSphere.closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 cursor-pointer">
                 Cancel
               </button>
-              <button type="submit" id="hl-submit-btn" class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-md">
-                Publish Reel (Fetch API)
+              <button type="submit" id="hl-submit-btn" class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-md cursor-pointer flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">publish</span>
+                Publish Reel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  } else if (type === 'cloudinarySettings') {
+    const config = getCloudinaryConfig();
+    modalContainer.innerHTML = `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay animate-fade-in" onclick="if(event.target === this) window.SportSphere.closeModal()">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-slide-up space-y-4">
+          <button onclick="window.SportSphere.closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl">cloud_sync</span>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Video Storage Config</span>
+              <h2 class="text-lg font-black text-slate-900">Cloudinary Credentials</h2>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Configure your Cloudinary account for instant video storage. Uses client-side unsigned upload presets so no secret API key is exposed.
+          </p>
+
+          <form onsubmit="window.SportSphere.handleCloudinarySettingsSubmit(event)" class="space-y-3.5 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Cloud Name</label>
+              <input type="text" id="cld-cloud-name" value="${config.cloudName || ''}" placeholder="e.g. my-sports-app" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Upload Preset (Unsigned)</label>
+              <input type="text" id="cld-upload-preset" value="${config.uploadPreset || ''}" placeholder="e.g. sportsphere_reels" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <p class="text-[10px] text-slate-400 mt-1">Found under Cloudinary Settings ➔ Upload ➔ Upload Presets (Mode: Unsigned)</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Upload Folder (Optional)</label>
+              <input type="text" id="cld-folder" value="${config.folder || 'sportsphere/highlights'}" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3">
+              <button type="button" onclick="window.SportSphere.closeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 cursor-pointer">
+                Cancel
+              </button>
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md cursor-pointer flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">save</span>
+                Save Config
               </button>
             </div>
           </form>
@@ -2191,6 +2582,15 @@ export function openModal(type) {
                     Browse
                     <input type="file" accept="image/*" class="hidden" onchange="window.SportSphere.handleBannerFileSelect(event)" />
                   </label>
+                </div>
+                <div class="mt-2">
+                  <span class="text-[10px] font-semibold text-slate-500 block mb-1">Preset Athlete Banners:</span>
+                  <div class="grid grid-cols-4 gap-1.5">
+                    <button type="button" onclick="document.getElementById('edit-banner').value='https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1600&q=80'" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-bold text-slate-700">Track Run</button>
+                    <button type="button" onclick="document.getElementById('edit-banner').value='https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1600&q=80'" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-bold text-slate-700">Football</button>
+                    <button type="button" onclick="document.getElementById('edit-banner').value='https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80'" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-bold text-slate-700">Stadium</button>
+                    <button type="button" onclick="document.getElementById('edit-banner').value='https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1600&q=80'" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[10px] font-bold text-slate-700">Night Match</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2438,6 +2838,192 @@ export function handleProfileEditSubmit(e) {
   renderHeaderProfile();
   renderActiveTab();
   showToast('🎉 Athlete profile updated and saved permanently!', 'info');
+}
+
+export function handleAboutSubmit(e) {
+  e.preventDefault();
+  const bio = document.getElementById('edit-about-bio')?.value?.trim();
+  if (!bio) {
+    showToast('About summary cannot be empty', 'error');
+    return;
+  }
+
+  if (!state.athleteProfile) state.athleteProfile = { profile: {} };
+  if (!state.athleteProfile.profile) state.athleteProfile.profile = {};
+  state.athleteProfile.profile.bio = bio;
+  state.athleteProfile.profile.about = bio;
+
+  // Persist to localStorage
+  try {
+    const stored = localStorage.getItem('sportsphere_student_user');
+    const userObj = stored ? JSON.parse(stored) : {};
+    userObj.bio = bio;
+    localStorage.setItem('sportsphere_student_user', JSON.stringify(userObj));
+  } catch {}
+
+  try {
+    const authStr = localStorage.getItem('sportsphere_auth_user');
+    if (authStr) {
+      const parsed = JSON.parse(authStr);
+      if (!parsed.profile) parsed.profile = {};
+      parsed.profile.bio = bio;
+      localStorage.setItem('sportsphere_auth_user', JSON.stringify(parsed));
+    }
+  } catch {}
+
+  closeModal();
+  renderActiveTab();
+  showToast('🎉 About & athletic summary saved permanently!', 'info');
+}
+
+export function handleExperienceSubmit(e, targetId) {
+  e.preventDefault();
+  const role = document.getElementById('exp-role')?.value?.trim();
+  const org = document.getElementById('exp-org')?.value?.trim();
+  const dur = document.getElementById('exp-dur')?.value?.trim();
+  const loc = document.getElementById('exp-loc')?.value?.trim();
+  const desc = document.getElementById('exp-desc')?.value?.trim();
+
+  if (!role || !org) {
+    showToast('Please provide both a Role and Organization', 'error');
+    return;
+  }
+
+  if (!state.athleteProfile) state.athleteProfile = {};
+  if (!Array.isArray(state.athleteProfile.experience)) state.athleteProfile.experience = [];
+
+  const exps = state.athleteProfile.experience;
+  const existingIdx = exps.findIndex(item => (item.id === targetId || String(item.id) === String(targetId)));
+
+  if (existingIdx >= 0) {
+    exps[existingIdx] = {
+      ...exps[existingIdx],
+      role,
+      organization: org,
+      duration: dur || 'Present',
+      location: loc || 'Regional Hub',
+      description: desc || ''
+    };
+    showToast('Position updated successfully!', 'info');
+  } else if (targetId && !isNaN(Number(targetId)) && exps[Number(targetId)]) {
+    exps[Number(targetId)] = {
+      ...exps[Number(targetId)],
+      role,
+      organization: org,
+      duration: dur || 'Present',
+      location: loc || 'Regional Hub',
+      description: desc || ''
+    };
+    showToast('Position updated successfully!', 'info');
+  } else {
+    exps.unshift({
+      id: 'exp-' + Date.now(),
+      role,
+      organization: org,
+      duration: dur || 'Present',
+      location: loc || 'Regional Hub',
+      description: desc || ''
+    });
+    showToast('New athletic career position added!', 'info');
+  }
+
+  try {
+    localStorage.setItem('sportsphere_student_experience', JSON.stringify(exps));
+  } catch {}
+
+  closeModal();
+  renderActiveTab();
+}
+
+export function deleteExperience(targetId) {
+  if (!confirm('Are you sure you want to delete this athletic experience position?')) return;
+  if (!state.athleteProfile || !Array.isArray(state.athleteProfile.experience)) return;
+
+  let exps = state.athleteProfile.experience;
+  exps = exps.filter((item, idx) => !(item.id === targetId || String(item.id) === String(targetId) || String(idx) === String(targetId)));
+  state.athleteProfile.experience = exps;
+
+  try {
+    localStorage.setItem('sportsphere_student_experience', JSON.stringify(exps));
+  } catch {}
+
+  renderActiveTab();
+  showToast('Position removed', 'info');
+}
+
+export function handleEducationSubmit(e, targetId) {
+  e.preventDefault();
+  const degree = document.getElementById('edu-degree')?.value?.trim();
+  const inst = document.getElementById('edu-inst')?.value?.trim();
+  const dur = document.getElementById('edu-dur')?.value?.trim();
+  const grade = document.getElementById('edu-grade')?.value?.trim();
+  const desc = document.getElementById('edu-desc')?.value?.trim();
+
+  if (!degree || !inst) {
+    showToast('Please provide both Degree and Institution', 'error');
+    return;
+  }
+
+  if (!state.athleteProfile) state.athleteProfile = {};
+  if (!Array.isArray(state.athleteProfile.education)) state.athleteProfile.education = [];
+
+  const edus = state.athleteProfile.education;
+  const existingIdx = edus.findIndex(item => (item.id === targetId || String(item.id) === String(targetId)));
+
+  if (existingIdx >= 0) {
+    edus[existingIdx] = {
+      ...edus[existingIdx],
+      degree,
+      institution: inst,
+      duration: dur || 'Present',
+      grade: grade || 'First Class',
+      activities: desc || ''
+    };
+    showToast('Academic record updated!', 'info');
+  } else if (targetId && !isNaN(Number(targetId)) && edus[Number(targetId)]) {
+    edus[Number(targetId)] = {
+      ...edus[Number(targetId)],
+      degree,
+      institution: inst,
+      duration: dur || 'Present',
+      grade: grade || 'First Class',
+      activities: desc || ''
+    };
+    showToast('Academic record updated!', 'info');
+  } else {
+    edus.unshift({
+      id: 'edu-' + Date.now(),
+      degree,
+      institution: inst,
+      duration: dur || 'Present',
+      grade: grade || 'First Class',
+      activities: desc || ''
+    });
+    showToast('Academic degree record added!', 'info');
+  }
+
+  try {
+    localStorage.setItem('sportsphere_student_education', JSON.stringify(edus));
+  } catch {}
+
+  closeModal();
+  renderActiveTab();
+}
+
+export function deleteEducation(targetId) {
+  if (!confirm('Are you sure you want to delete this education record?')) return;
+  if (!state.athleteProfile || !Array.isArray(state.athleteProfile.education)) return;
+
+  let edus = state.athleteProfile.education;
+  edus = edus.filter((item, idx) => !(item.id === targetId || String(item.id) === String(targetId) || String(idx) === String(targetId)));
+  state.athleteProfile.education = edus;
+
+  try {
+    localStorage.setItem('sportsphere_student_education', JSON.stringify(edus));
+  } catch {}
+
+  renderActiveTab();
+  showToast('Education record removed', 'info');
 }
 
 // Bookmark Toggle
@@ -2809,9 +3395,17 @@ window.SportSphere = {
   renderSidebar,
   handleLogout,
   handleProfileEditSubmit,
+  handleAboutSubmit,
+  handleExperienceSubmit,
+  deleteExperience,
+  handleEducationSubmit,
+  deleteEducation,
   handleAvatarFileSelect,
   handleBannerFileSelect
 };
+
+// SportSync Global Alias
+window.SportSync = window.SportSphere;
 
 // Start application when DOM is ready
 document.addEventListener('DOMContentLoaded', initApp);

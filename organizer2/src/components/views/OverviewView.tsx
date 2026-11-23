@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   Users,
@@ -9,9 +9,15 @@ import {
   Plus,
   CalendarRange,
   Megaphone,
-  ChevronRight,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Bell,
+  CheckCircle2,
+  Activity,
+  Zap,
+  BarChart3,
+  ChevronRight,
+  Camera,
 } from 'lucide-react';
 import { ViewId, SportEvent, RegistrationApplicant, ActivityItem } from '../../types';
 import { getLoggedInOrganizer } from '../../utils/userSession';
@@ -27,6 +33,13 @@ interface OverviewViewProps {
   showToast: (msg: string) => void;
   pendingApprovalsCount: number;
 }
+
+const greetingByTime = () => {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good Morning';
+  if (h < 17) return 'Good Afternoon';
+  return 'Good Evening';
+};
 
 export const OverviewView: React.FC<OverviewViewProps> = ({
   events,
@@ -44,76 +57,163 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   const organizer = getLoggedInOrganizer();
 
   const heroSlides = [
-    { title: 'Create Competitions', subtitle: 'Build Communities' },
-    { title: 'Scout Top Athletes', subtitle: 'Track Performance Metrics' },
-    { title: 'Automate Tournament Draws', subtitle: 'Real-time Leaderboards' },
+    { title: 'Create Competitions', subtitle: 'Build Communities', color: 'from-blue-600 to-indigo-700' },
+    { title: 'Scout Top Athletes', subtitle: 'Track Performance Metrics', color: 'from-emerald-600 to-teal-700' },
+    { title: 'Automate Tournament Draws', subtitle: 'Real-time Leaderboards', color: 'from-violet-600 to-purple-700' },
   ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeroSlide(prev => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const filteredEvents = events.filter((ev) => {
     if (sportFilter === 'All') return true;
     return ev.sport.toLowerCase() === sportFilter.toLowerCase();
   });
 
-  return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in">
-      {/* Hero Banner */}
-      <section className="relative rounded-2xl overflow-hidden shadow-xs border border-slate-200 min-h-[170px] sm:min-h-[190px] flex items-center justify-between p-4 sm:p-6 md:p-8 bg-slate-900">
-        <div
-          className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-700"
-          style={{
-            backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuD2kKYWPvDLt8Opmxf3_N1AOQIkISBdQZ9p4Bi4ZRdoxytIbPDuH_hSGbxznYSdaqrOvnUqtx6xLPfkpoWx7KVFyHFryTdsuGladAI7NPBqwxQL6b1HZGpqqW6g2F8U2IERVyoiH4zfG1iLcC-wc_5t8kta3uW4wtWEs1f0BMNfFAHt3tS29Sy_AnYROMc6j2nZdobrx8HM8d3Ty78UjxA1hnvxqFp7zBI9eb8EM8JHOynyqsTsaW9RaA')`,
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/85 to-transparent" />
-        </div>
+  const statCards = [
+    {
+      label: 'Total Events',
+      value: events.length,
+      trend: '+20%',
+      trendUp: true,
+      sub: 'vs last sem',
+      icon: Sparkles,
+      color: 'blue',
+      view: 'events' as ViewId,
+    },
+    {
+      label: 'Total Registrations',
+      value: 486,
+      trend: '+32%',
+      trendUp: true,
+      sub: 'vs last sem',
+      icon: Users,
+      color: 'emerald',
+      view: 'registrations' as ViewId,
+    },
+    {
+      label: 'Pending Approvals',
+      value: pendingApprovalsCount,
+      trend: '-12%',
+      trendUp: false,
+      sub: 'vs last week',
+      icon: Clock,
+      color: 'amber',
+      view: 'registrations' as ViewId,
+    },
+    {
+      label: 'Total Revenue',
+      value: '₹48,500',
+      trend: '+28%',
+      trendUp: true,
+      sub: 'vs last sem',
+      icon: CreditCard,
+      color: 'purple',
+      view: 'payments' as ViewId,
+    },
+  ];
 
-        <div className="relative z-10 max-w-xl text-white">
-          <div className="text-xs sm:text-sm font-normal text-slate-300">
-            Good Evening,
-          </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mt-0.5 text-white">
+  const colorMap: Record<string, { bg: string; text: string; border: string; iconBg: string; hoverBorder: string }> = {
+    blue: {
+      bg: 'bg-blue-50',
+      text: 'text-blue-600',
+      border: 'border-blue-100',
+      iconBg: 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white',
+      hoverBorder: 'hover:border-blue-300',
+    },
+    emerald: {
+      bg: 'bg-emerald-50',
+      text: 'text-emerald-600',
+      border: 'border-emerald-100',
+      iconBg: 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
+      hoverBorder: 'hover:border-emerald-300',
+    },
+    amber: {
+      bg: 'bg-amber-50',
+      text: 'text-amber-600',
+      border: 'border-amber-100',
+      iconBg: 'bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white',
+      hoverBorder: 'hover:border-amber-300',
+    },
+    purple: {
+      bg: 'bg-purple-50',
+      text: 'text-purple-600',
+      border: 'border-purple-100',
+      iconBg: 'bg-purple-100 text-purple-600 group-hover:bg-purple-600 group-hover:text-white',
+      hoverBorder: 'hover:border-purple-300',
+    },
+  };
+
+  return (
+    <div className="space-y-5 sm:space-y-6 animate-fade-in">
+      {/* ── Hero Banner ── */}
+      <section className="relative rounded-2xl overflow-hidden min-h-[180px] sm:min-h-[200px] flex items-center justify-between shadow-md border border-slate-800/10">
+        {/* Background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+          style={{
+            backgroundImage: `url('${organizer.banner || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80'}')`,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/80 to-transparent" />
+        {/* Quick Edit Banner Button */}
+        <button
+          onClick={() => onNavigate('settings')}
+          className="absolute top-3.5 right-3.5 z-20 p-2 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
+          title="Customize Banner in Settings"
+        >
+          <Camera className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline text-[11px]">Edit Banner</span>
+        </button>
+        {/* Animated accent gradient */}
+        <div className={`absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l ${heroSlides[heroSlide].color} opacity-20 transition-all duration-1000`} />
+
+        {/* Left: Greeting */}
+        <div className="relative z-10 px-6 sm:px-8 py-6 sm:py-8 max-w-lg">
+          <p className="text-xs sm:text-sm font-normal text-slate-300">{greetingByTime()},</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-0.5 drop-shadow-sm">
             {organizer.name.split(' ')[0]}!
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1 font-normal">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1.5">
             Here's what's happening with your events today.
           </p>
-          <div className="mt-3 sm:mt-4 inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-[11px] sm:text-xs text-white hover:border-white/30 transition-colors">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-            <span className="font-medium text-slate-200">Organizer Dashboard</span>
-            <span className="text-slate-400 hidden xs:inline">•</span>
-            <span className="text-slate-300 hidden xs:inline truncate">{organizer.org}</span>
+          <div className="mt-4 flex items-center gap-2.5 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-xs text-white">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="font-semibold">Organizer Dashboard</span>
+              <span className="text-slate-400 hidden xs:inline">•</span>
+              <span className="text-slate-300 hidden xs:inline truncate max-w-[140px]">{organizer.org}</span>
+            </div>
+            <button
+              onClick={onOpenCreateModal}
+              className="btn-interactive btn-shine inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-full shadow-md shadow-blue-900/40 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create Event</span>
+            </button>
           </div>
         </div>
 
-        <div className="relative z-10 hidden lg:flex flex-col items-end text-white">
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-base font-bold tracking-tight text-white drop-shadow-sm transition-all duration-300">
-                {heroSlides[heroSlide].title}
-              </div>
-              <div className="text-xs text-slate-200 drop-shadow-sm">
-                {heroSlides[heroSlide].subtitle}
-              </div>
+        {/* Right: Slide content */}
+        <div className="relative z-10 hidden md:flex flex-col items-end gap-3 px-8 py-6">
+          <div className="text-right">
+            <div className="text-lg font-extrabold text-white drop-shadow-sm transition-all duration-500 key={heroSlide}">
+              {heroSlides[heroSlide].title}
             </div>
-            <button
-              onClick={() => {
-                const next = (heroSlide + 1) % heroSlides.length;
-                setHeroSlide(next);
-                showToast(`Showcase view: ${heroSlides[next].title}`);
-              }}
-              className="btn-interactive w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-xs border border-white/20 flex items-center justify-center text-white cursor-pointer active:scale-90"
-              title="Next Slide"
-            >
-              <ChevronRight className="w-4 h-4 transition-transform duration-200 hover:translate-x-0.5" strokeWidth={2.5} />
-            </button>
+            <div className="text-sm text-slate-300">{heroSlides[heroSlide].subtitle}</div>
           </div>
-          <div className="flex items-center gap-1.5 mt-3 pr-1">
+          {/* Slide indicators */}
+          <div className="flex items-center gap-1.5">
             {heroSlides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setHeroSlide(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  i === heroSlide ? 'w-4 bg-white shadow-xs' : 'w-1.5 bg-white/40 hover:bg-white/70'
+                  i === heroSlide ? 'w-5 bg-white' : 'w-1.5 bg-white/30 hover:bg-white/60'
                 }`}
               />
             ))}
@@ -121,123 +221,59 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         </div>
       </section>
 
-      {/* KPI Metrics: 2 columns on phone screens, 4 on desktop */}
+      {/* ── KPI Stat Cards ── */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* TOTAL EVENTS */}
-        <div
-          onClick={() => onNavigate('events')}
-          className="btn-press bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group"
-        >
-          <div className="flex items-center gap-2.5 sm:gap-4 mb-2 sm:mb-0">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-blue-100 transition-all duration-200">
-              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:rotate-12" />
-            </div>
-            <div>
-              <div className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-blue-600 transition-colors">
-                Total Events
+        {statCards.map((stat) => {
+          const Icon = stat.icon;
+          const c = colorMap[stat.color];
+          return (
+            <button
+              key={stat.label}
+              onClick={() => onNavigate(stat.view)}
+              className={`btn-press bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 ${c.hoverBorder} shadow-2xs hover:shadow-md transition-all group text-left flex flex-col gap-3 cursor-pointer`}
+            >
+              <div className="flex items-start justify-between">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 ${c.iconBg}`}>
+                  <Icon className="w-5 h-5 transition-all duration-200" />
+                </div>
+                <div className="text-right">
+                  <div className={`flex items-center justify-end gap-0.5 text-xs font-bold ${stat.trendUp ? 'text-emerald-600' : 'text-rose-500'}`}>
+                    {stat.trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {stat.trend}
+                  </div>
+                  <div className="text-[10px] text-slate-400">{stat.sub}</div>
+                </div>
               </div>
-              <div className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">12</div>
-            </div>
-          </div>
-          <div className="text-left sm:text-right">
-            <span className="inline-flex items-center text-[10px] sm:text-xs font-bold text-emerald-600">
-              ↑ 20%
-            </span>
-            <div className="text-[9px] sm:text-[10px] text-slate-400">vs last sem</div>
-          </div>
-        </div>
-
-        {/* TOTAL REGISTRATIONS */}
-        <div
-          onClick={() => onNavigate('registrations')}
-          className="btn-press bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between cursor-pointer hover:border-emerald-300 hover:shadow-md transition-all group"
-        >
-          <div className="flex items-center gap-2.5 sm:gap-4 mb-2 sm:mb-0">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-200">
-              <Users className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:scale-110" />
-            </div>
-            <div>
-              <div className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition-colors">
-                Total Registrations
+              <div>
+                <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider group-hover:text-slate-700 transition-colors">
+                  {stat.label}
+                </div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-0.5 tracking-tight">
+                  {stat.value}
+                </div>
               </div>
-              <div className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">486</div>
-            </div>
-          </div>
-          <div className="text-left sm:text-right">
-            <span className="inline-flex items-center text-[10px] sm:text-xs font-bold text-emerald-600">
-              ↑ 32%
-            </span>
-            <div className="text-[9px] sm:text-[10px] text-slate-400">vs last sem</div>
-          </div>
-        </div>
-
-        {/* PENDING APPROVALS */}
-        <div
-          onClick={() => onNavigate('registrations')}
-          className="btn-press bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between cursor-pointer hover:border-amber-300 hover:shadow-md transition-all group"
-        >
-          <div className="flex items-center gap-2.5 sm:gap-4 mb-2 sm:mb-0">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-200">
-              <Clock className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:rotate-45" />
-            </div>
-            <div>
-              <div className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition-colors">
-                Pending Approvals
-              </div>
-              <div className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
-                {pendingApprovalsCount}
-              </div>
-            </div>
-          </div>
-          <div className="text-left sm:text-right">
-            <span className="inline-flex items-center text-[10px] sm:text-xs font-bold text-rose-600">
-              ↓ 12%
-            </span>
-            <div className="text-[9px] sm:text-[10px] text-slate-400">vs last week</div>
-          </div>
-        </div>
-
-        {/* TOTAL REVENUE */}
-        <div
-          onClick={() => onNavigate('payments')}
-          className="btn-press bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between cursor-pointer hover:border-purple-300 hover:shadow-md transition-all group"
-        >
-          <div className="flex items-center gap-2.5 sm:gap-4 mb-2 sm:mb-0">
-            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-purple-100 transition-all duration-200">
-              <CreditCard className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:scale-110" />
-            </div>
-            <div>
-              <div className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition-colors">
-                Total Revenue
-              </div>
-              <div className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
-                ₹48,500
-              </div>
-            </div>
-          </div>
-          <div className="text-left sm:text-right">
-            <span className="inline-flex items-center text-[10px] sm:text-xs font-bold text-emerald-600">
-              ↑ 28%
-            </span>
-            <div className="text-[9px] sm:text-[10px] text-slate-400">vs last sem</div>
-          </div>
-        </div>
+            </button>
+          );
+        })}
       </section>
 
-      {/* Split Layout: Table + Side Widgets */}
+      {/* ── Main Content Grid ── */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 sm:gap-6 items-start">
-        {/* Left Column (8 cols) */}
+        {/* Left Column */}
         <div className="xl:col-span-8 space-y-5 sm:space-y-6">
-          {/* My Events Card */}
+          {/* My Events Table */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-            <div className="p-4 sm:p-5 pb-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
                   <Calendar className="w-4 h-4" />
                 </div>
-                <h2 className="text-base font-bold text-slate-900">My Events</h2>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900">My Events</h2>
+                  <p className="text-[11px] text-slate-400">Active tournaments & competitions</p>
+                </div>
               </div>
-              <div className="flex items-center flex-wrap gap-2">
+              <div className="flex items-center gap-2">
                 <select
                   value={sportFilter}
                   onChange={(e) => setSportFilter(e.target.value)}
@@ -251,68 +287,67 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                 </select>
                 <button
                   onClick={() => onNavigate('events')}
-                  className="btn-press text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer transition-colors group"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors group"
                 >
-                  <span>View All</span>
-                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                  View All
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
                 </button>
               </div>
             </div>
 
-            {/* Table with responsive horizontal scroll wrapper */}
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs min-w-[620px]">
                 <thead>
-                  <tr className="border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                    <th className="py-3 px-4 sm:px-5">Event</th>
+                  <tr className="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                    <th className="py-3 px-5">Event</th>
                     <th className="py-3 px-3">Sport</th>
                     <th className="py-3 px-3">Date</th>
                     <th className="py-3 px-3">Venue</th>
-                    <th className="py-3 px-3 text-center">Registrations</th>
+                    <th className="py-3 px-3 text-center">Regs</th>
                     <th className="py-3 px-3">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    <th className="py-3 px-4 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
                   {filteredEvents.map((ev) => (
-                    <tr
-                      key={ev.id}
-                      className="hover:bg-slate-50/80 transition-colors group"
-                    >
-                      <td className="py-3.5 px-4 sm:px-5">
+                    <tr key={ev.id} className="hover:bg-blue-50/40 transition-colors group">
+                      <td className="py-3.5 px-5">
                         <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{ev.title}</div>
-                        <div className="text-[11px] text-slate-400 font-normal">
-                          {ev.subtitle}
-                        </div>
+                        <div className="text-[10px] text-slate-400 font-normal">{ev.subtitle}</div>
                       </td>
-                      <td className="py-3.5 px-3 text-slate-600">{ev.sport}</td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        {ev.date}{' '}
-                        <span
-                          className={`text-[10px] block font-semibold ${
-                            ev.daysLeftColor === 'red'
-                              ? 'text-rose-500'
-                              : 'text-blue-600'
-                          }`}
-                        >
-                          {ev.daysLeft} days left
+                      <td className="py-3.5 px-3">
+                        <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[10px] font-semibold">{ev.sport}</span>
+                      </td>
+                      <td className="py-3.5 px-3 whitespace-nowrap text-slate-600">
+                        {ev.date}
+                        <span className={`text-[10px] block font-bold ${ev.daysLeftColor === 'red' ? 'text-rose-500' : 'text-blue-600'}`}>
+                          {ev.daysLeft}d left
                         </span>
                       </td>
-                      <td className="py-3.5 px-3 text-slate-700">{ev.venue}</td>
-                      <td className="py-3.5 px-3 text-center font-bold text-slate-700">
-                        {ev.registeredCount} / {ev.totalCapacity}
+                      <td className="py-3.5 px-3 text-slate-600">{ev.venue}</td>
+                      <td className="py-3.5 px-3 text-center">
+                        <div className="inline-flex flex-col items-center">
+                          <span className="font-bold text-slate-900">{ev.registeredCount}/{ev.totalCapacity}</span>
+                          <div className="w-12 h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                            <div
+                              className="h-1 bg-blue-500 rounded-full"
+                              style={{ width: `${Math.min(100, (ev.registeredCount / ev.totalCapacity) * 100)}%` }}
+                            />
+                          </div>
+                        </div>
                       </td>
                       <td className="py-3.5 px-3">
                         {ev.status === 'Open' ? (
-                          <span className="inline-flex px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             Open
                           </span>
                         ) : ev.status === 'Draft' ? (
-                          <span className="inline-flex px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700">
+                          <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                             Draft
                           </span>
                         ) : (
-                          <span className="inline-flex px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">
+                          <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
                             {ev.status}
                           </span>
                         )}
@@ -321,14 +356,14 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                         {ev.status === 'Draft' ? (
                           <button
                             onClick={() => onPublishEvent(ev.id)}
-                            className="btn-interactive px-2.5 py-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md font-semibold cursor-pointer"
+                            className="btn-interactive px-3 py-1 text-xs bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-semibold cursor-pointer shadow-sm"
                           >
                             Publish
                           </button>
                         ) : (
                           <button
                             onClick={() => onNavigate('fixtures')}
-                            className="btn-interactive px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-md font-medium cursor-pointer"
+                            className="btn-interactive px-3 py-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium cursor-pointer"
                           >
                             Bracket
                           </button>
@@ -341,45 +376,46 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             </div>
           </div>
 
-          {/* Bottom 2-col cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {/* Recent Registrations Card */}
+          {/* Bottom 2-col */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            {/* Recent Registrations */}
             <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 className="text-xs font-bold text-slate-900">
-                  Recent Registrations
-                </h3>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <Users className="w-3.5 h-3.5" />
+                  </div>
+                  <h3 className="text-xs font-bold text-slate-900">Recent Registrations</h3>
+                </div>
                 <button
                   onClick={() => onNavigate('registrations')}
-                  className="btn-press text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
+                  className="btn-press text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-0.5 group"
                 >
-                  View All
+                  View All <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
-              <div className="divide-y divide-slate-100 mt-1">
-                {registrations.slice(0, 2).map((reg) => (
-                  <div
-                    key={reg.id}
-                    className="py-3 flex items-center justify-between group"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                        {reg.name}
+              <div className="divide-y divide-slate-100">
+                {registrations.slice(0, 3).map((reg) => (
+                  <div key={reg.id} className="py-3 flex items-center justify-between group">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                        {reg.name.charAt(0)}
                       </div>
-                      <div className="text-[11px] text-slate-400">
-                        {reg.sport} • {reg.teamOrCollege}
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">{reg.name}</div>
+                        <div className="text-[10px] text-slate-400">{reg.sport} • {reg.teamOrCollege}</div>
                       </div>
                     </div>
                     {reg.status === 'Pending' ? (
                       <button
                         onClick={() => onOpenReviewModal(reg)}
-                        className="btn-interactive px-2.5 py-1 text-[11px] font-semibold bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md cursor-pointer"
+                        className="btn-interactive px-2.5 py-1 text-[10px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg cursor-pointer shrink-0 ml-2"
                       >
                         Review
                       </button>
                     ) : (
-                      <span className="px-2 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-600 rounded">
-                        Verified
+                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-600 rounded-full shrink-0 ml-2">
+                        <CheckCircle2 className="w-3 h-3" /> Verified
                       </span>
                     )}
                   </div>
@@ -387,10 +423,15 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               </div>
             </div>
 
-            {/* Latest Activity Card */}
+            {/* Activity Feed */}
             <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 className="text-xs font-bold text-slate-900">Latest Activity</h3>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center">
+                    <Activity className="w-3.5 h-3.5" />
+                  </div>
+                  <h3 className="text-xs font-bold text-slate-900">Latest Activity</h3>
+                </div>
                 <button
                   onClick={() => showToast('Activity feed refreshed')}
                   className="btn-press text-xs font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
@@ -398,18 +439,17 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                   Refresh
                 </button>
               </div>
-              <div className="space-y-2.5 mt-3">
-                {activities.slice(0, 3).map((act) => (
+              <div className="space-y-1.5 mt-2">
+                {activities.slice(0, 4).map((act) => (
                   <div
                     key={act.id}
-                    className="flex items-center justify-between text-xs hover:bg-slate-50 p-1.5 rounded-lg transition-colors"
+                    className="flex items-start justify-between text-xs hover:bg-slate-50 p-2 rounded-lg transition-colors gap-2"
                   >
-                    <span className="text-slate-800 font-medium">
-                      {act.text}
-                    </span>
-                    <span className="text-[10px] text-slate-400 whitespace-nowrap pl-2">
-                      {act.timeAgo}
-                    </span>
+                    <div className="flex items-start gap-2 min-w-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                      <span className="text-slate-700 font-medium leading-relaxed">{act.text}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 whitespace-nowrap shrink-0">{act.timeAgo}</span>
                   </div>
                 ))}
               </div>
@@ -417,120 +457,92 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </div>
         </div>
 
-        {/* Right Side Widgets (4 cols) */}
-        <div className="xl:col-span-4 space-y-4 sm:space-y-6">
+        {/* Right Column */}
+        <div className="xl:col-span-4 space-y-4 sm:space-y-5">
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 mb-3">
-              QUICK ACTIONS
-            </h3>
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-              <button
-                onClick={onOpenCreateModal}
-                className="btn-interactive p-3 bg-slate-50 hover:bg-blue-50 border border-slate-200/80 hover:border-blue-300 rounded-xl flex items-center gap-2.5 text-left cursor-pointer group shadow-2xs hover:shadow-xs"
-              >
-                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-115 group-hover:bg-blue-600 group-hover:text-white transition-all duration-200 shadow-2xs">
-                  <Plus className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" />
-                </div>
-                <div className="text-xs font-bold text-slate-800 group-hover:text-blue-900 transition-colors">
-                  Create Event
-                </div>
-              </button>
-
-              <button
-                onClick={() => onNavigate('registrations')}
-                className="btn-interactive p-3 bg-slate-50 hover:bg-emerald-50 border border-slate-200/80 hover:border-emerald-300 rounded-xl flex items-center gap-2.5 text-left cursor-pointer group shadow-2xs hover:shadow-xs"
-              >
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-115 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-200 shadow-2xs">
-                  <Users className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
-                </div>
-                <div className="text-xs font-bold text-slate-800 group-hover:text-emerald-900 transition-colors">
-                  Registrations
-                </div>
-              </button>
-
-              <button
-                onClick={() => onNavigate('fixtures')}
-                className="btn-interactive p-3 bg-slate-50 hover:bg-purple-50 border border-slate-200/80 hover:border-purple-300 rounded-xl flex items-center gap-2.5 text-left cursor-pointer group shadow-2xs hover:shadow-xs"
-              >
-                <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 group-hover:scale-115 group-hover:bg-purple-600 group-hover:text-white transition-all duration-200 shadow-2xs">
-                  <CalendarRange className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
-                </div>
-                <div className="text-xs font-bold text-slate-800 group-hover:text-purple-900 transition-colors">
-                  Fixtures
-                </div>
-              </button>
-
-              <button
-                onClick={() => onNavigate('announcements')}
-                className="btn-interactive p-3 bg-slate-50 hover:bg-amber-50 border border-slate-200/80 hover:border-amber-300 rounded-xl flex items-center gap-2.5 text-left cursor-pointer group shadow-2xs hover:shadow-xs"
-              >
-                <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 group-hover:scale-115 group-hover:bg-amber-600 group-hover:text-white transition-all duration-200 shadow-2xs">
-                  <Megaphone className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12" />
-                </div>
-                <div className="text-xs font-bold text-slate-800 group-hover:text-amber-900 transition-colors">
-                  Broadcast
-                </div>
-              </button>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                <Zap className="w-3.5 h-3.5" />
+              </div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Quick Actions</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              {[
+                { label: 'Create Event', icon: Plus, color: 'blue', action: onOpenCreateModal },
+                { label: 'Registrations', icon: Users, color: 'emerald', action: () => onNavigate('registrations') },
+                { label: 'Fixtures', icon: CalendarRange, color: 'purple', action: () => onNavigate('fixtures') },
+                { label: 'Broadcast', icon: Megaphone, color: 'amber', action: () => onNavigate('announcements') },
+              ].map(({ label, icon: Icon, color, action }) => {
+                const qc = colorMap[color] || colorMap.blue;
+                return (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className={`btn-interactive p-3 ${qc.bg} hover:border-current border border-slate-200/80 rounded-xl flex flex-col items-center gap-2 text-center cursor-pointer group shadow-2xs hover:shadow-xs transition-all`}
+                  >
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 ${qc.iconBg}`}>
+                      <Icon className="w-4 h-4 transition-all" />
+                    </div>
+                    <span className={`text-[11px] font-bold ${qc.text} group-hover:opacity-100`}>{label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Upcoming Deadlines */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
-            <h3 className="text-xs font-bold text-slate-900 pb-3 border-b border-slate-100">
-              Upcoming Deadlines
-            </h3>
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+              <div className="w-7 h-7 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+                <Bell className="w-3.5 h-3.5" />
+              </div>
+              <h3 className="text-xs font-bold text-slate-900">Upcoming Deadlines</h3>
+            </div>
             <div className="space-y-3 mt-3">
-              <div className="flex items-center justify-between text-xs hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
-                <div>
-                  <div className="font-bold text-slate-900">Document verification</div>
-                  <div className="text-[11px] text-slate-400">
-                    12 registrations pending
+              {[
+                { title: 'Document verification', sub: '12 registrations pending', badge: 'Today', badgeClass: 'bg-rose-50 text-rose-600 border border-rose-200 animate-pulse' },
+                { title: 'Payment confirmation', sub: '8 registrations', badge: 'Oct 22', badgeClass: 'bg-slate-100 text-slate-600' },
+                { title: 'Fixture draw announcement', sub: 'Football Cup bracket', badge: 'Oct 24', badgeClass: 'bg-amber-50 text-amber-700' },
+              ].map((d, i) => (
+                <div key={i} className="flex items-center justify-between text-xs hover:bg-slate-50 p-2 rounded-lg transition-colors gap-2">
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 truncate">{d.title}</div>
+                    <div className="text-[10px] text-slate-400">{d.sub}</div>
                   </div>
+                  <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${d.badgeClass}`}>{d.badge}</span>
                 </div>
-                <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded animate-pulse">Today</span>
-              </div>
-              <div className="flex items-center justify-between text-xs hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
-                <div>
-                  <div className="font-bold text-slate-900">Payment confirmation</div>
-                  <div className="text-[11px] text-slate-400">8 registrations</div>
-                </div>
-                <span className="font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">Oct 22</span>
-              </div>
+              ))}
             </div>
           </div>
 
           {/* Venue Utilization */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
-            <h3 className="text-xs font-bold text-slate-900 pb-3 border-b border-slate-100">
-              Venue Utilization
-            </h3>
-            <div className="space-y-3 mt-3 text-xs">
-              <div>
-                <div className="flex justify-between font-medium text-slate-700 mb-1">
-                  <span>Main Ground</span>
-                  <span className="font-bold text-slate-900">72%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-700"
-                    style={{ width: '72%' }}
-                  />
-                </div>
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+              <div className="w-7 h-7 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
+                <BarChart3 className="w-3.5 h-3.5" />
               </div>
-
-              <div>
-                <div className="flex justify-between font-medium text-slate-700 mb-1">
-                  <span>Indoor Stadium</span>
-                  <span className="font-bold text-slate-900">48%</span>
+              <h3 className="text-xs font-bold text-slate-900">Venue Utilization</h3>
+            </div>
+            <div className="space-y-4 mt-3 text-xs">
+              {[
+                { name: 'Main Ground', pct: 72, color: 'bg-blue-500' },
+                { name: 'Indoor Stadium', pct: 48, color: 'bg-teal-500' },
+                { name: 'Badminton Court A', pct: 85, color: 'bg-violet-500' },
+              ].map((v) => (
+                <div key={v.name}>
+                  <div className="flex justify-between font-medium text-slate-700 mb-1.5">
+                    <span>{v.name}</span>
+                    <span className="font-bold text-slate-900">{v.pct}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={`${v.color} h-1.5 rounded-full transition-all duration-1000`}
+                      style={{ width: `${v.pct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-teal-500 h-2 rounded-full transition-all duration-700"
-                    style={{ width: '48%' }}
-                  />
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

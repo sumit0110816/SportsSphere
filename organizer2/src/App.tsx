@@ -4,11 +4,9 @@ import {
   Calendar, 
   Users, 
   CalendarRange, 
-  Menu,
-  ShieldAlert,
-  Trophy
+  Menu
 } from 'lucide-react';
-import { ViewId, UserRole, SportEvent, RegistrationApplicant, ActivityItem } from './types';
+import { ViewId, SportEvent, RegistrationApplicant, ActivityItem } from './types';
 import {
   INITIAL_EVENTS,
   INITIAL_REGISTRATIONS,
@@ -40,8 +38,8 @@ import { SettingsView } from './components/views/SettingsView';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewId>('overview');
-  const [currentRole, setCurrentRole] = useState<UserRole>('Organizer');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Core Data States
   const [events, setEvents] = useState<SportEvent[]>(INITIAL_EVENTS);
@@ -149,8 +147,7 @@ export default function App() {
     <div className="h-full flex flex-col bg-[#f8fafc] text-slate-800">
       {/* Top Header */}
       <Header
-        currentRole={currentRole}
-        onRoleChange={setCurrentRole}
+        currentView={currentView}
         onOpenCreateModal={() => setIsCreateModalOpen(true)}
         onOpenCmdPalette={() => setIsCmdPaletteOpen(true)}
         onNavigate={(view) => {
@@ -176,30 +173,12 @@ export default function App() {
           pendingApprovalsCount={pendingApprovalsCount}
           isOpenOnMobile={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
         />
 
         {/* Main Workspace Area with bottom padding on mobile for the navbar */}
         <main className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-5 pb-24 md:pb-6">
-          {/* Active Role Notice if not Organizer */}
-          {currentRole !== 'Organizer' && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-900 animate-fade-in">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-blue-600 shrink-0" />
-                <span>
-                  Viewing platform in <strong>{currentRole} Mode</strong>. All events and rosters reflect live varsity schedules.
-                </span>
-              </div>
-              <button
-                onClick={() => {
-                  setCurrentRole('Organizer');
-                  showToast('Restored Organizer Dashboard');
-                }}
-                className="btn-interactive text-blue-700 underline font-semibold text-xs ml-2 cursor-pointer shrink-0"
-              >
-                Return to Organizer
-              </button>
-            </div>
-          )}
 
           {currentView === 'overview' && (
             <OverviewView

@@ -122,6 +122,7 @@ export interface HighlightReel {
   sport: SportCategory;
   videoDuration: string;
   thumbnail: string;
+  videoUrl?: string;
   views: string;
   timestamp: string;
   badge: string;

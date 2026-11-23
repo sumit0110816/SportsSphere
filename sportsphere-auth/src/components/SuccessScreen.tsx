@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ExternalLink, Sparkles, Trophy, Dumbbell, GraduationCap } from 'lucide-react';
+import { CheckCircle2, ExternalLink, ShieldCheck, Trophy, Dumbbell, GraduationCap } from 'lucide-react';
 import { ROLE_CONFIG, type UserSession } from '../types/auth';
 
 interface SuccessScreenProps {
@@ -133,8 +133,8 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ session, onReset }
             marginBottom: '14px',
           }}
         >
-          <Sparkles size={13} />
-          Profile Activated Successfully
+          <ShieldCheck size={13} />
+          Profile Verified & Active
         </div>
 
         {/* Welcome Heading */}
@@ -147,7 +147,7 @@ export const SuccessScreen: React.FC<SuccessScreenProps> = ({ session, onReset }
             margin: '0 0 8px',
           }}
         >
-          Welcome, {name || 'SportSphere Member'}!
+          Welcome, {name || 'SportSync Member'}!
         </h2>
 
         <p style={{ fontSize: '14px', color: '#475569', margin: '0 0 24px', lineHeight: 1.5 }}>

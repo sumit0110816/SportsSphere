@@ -16,6 +16,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ showToast }) => {
   const [sport, setSport] = useState(organizer.sport || 'Multi-Sport');
   const [bio, setBio] = useState(organizer.bio || 'Official Sports Event Organizer & Tournament Director');
   const [avatar, setAvatar] = useState(organizer.avatar || '');
+  const [banner, setBanner] = useState(organizer.banner || '');
   const [whatsappNotifs, setWhatsappNotifs] = useState(true);
   const [autoApproveVerified, setAutoApproveVerified] = useState(true);
   const [liveScoreBroadcast, setLiveScoreBroadcast] = useState(true);
@@ -28,6 +29,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ showToast }) => {
       if (evt.target?.result) {
         setAvatar(evt.target.result as string);
         showToast(`Selected logo/avatar: ${file.name}`);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBannerFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (evt.target?.result) {
+        setBanner(evt.target.result as string);
+        showToast(`Selected cover banner: ${file.name}`);
       }
     };
     reader.readAsDataURL(file);
@@ -50,6 +64,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ showToast }) => {
       sport: sport.trim(),
       bio: bio.trim(),
       avatar: avatar.trim(),
+      banner: banner.trim(),
     };
 
     // Save in localStorage
@@ -71,13 +86,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ showToast }) => {
         parsed.profile.city = updated.city;
         parsed.profile.bio = updated.bio;
         if (updated.avatar) parsed.profile.avatar = updated.avatar;
+        if (updated.banner) parsed.profile.banner = updated.banner;
         localStorage.setItem('sportsphere_auth_user', JSON.stringify(parsed));
       }
     } catch {}
 
     setOrganizer(updated);
     window.dispatchEvent(new Event('organizer-profile-updated'));
-    showToast('🎉 Organization & coordinator profile saved permanently!');
+    showToast('🎉 Organization profile and cover banner saved permanently!');
   };
 
   return (
@@ -199,6 +215,54 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ showToast }) => {
                 Browse
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarFileSelect} />
               </label>
+            </div>
+          </div>
+
+          {/* Cover Banner Selection */}
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="block font-semibold text-slate-700 text-xs">
+                Organization Cover Banner (URL or Device Upload)
+              </label>
+              <span className="text-[10px] text-slate-400">Shows on dashboard overview</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={banner}
+                onChange={(e) => setBanner(e.target.value)}
+                placeholder="https://... or choose file from device"
+                className="flex-1 text-xs rounded-lg border border-slate-300 p-2 bg-white"
+              />
+              <label className="px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold cursor-pointer shrink-0">
+                Browse
+                <input type="file" accept="image/*" className="hidden" onChange={handleBannerFileSelect} />
+              </label>
+            </div>
+            {/* Presets */}
+            <div className="pt-1">
+              <span className="text-[10px] font-semibold text-slate-500 block mb-1">Preset Stadium & Arena Banners:</span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { label: 'Stadium Light', url: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80' },
+                  { label: 'Track Field', url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1600&q=80' },
+                  { label: 'Varsity Pitch', url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1600&q=80' },
+                  { label: 'Night Game', url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1600&q=80' }
+                ].map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => setBanner(p.url)}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border truncate transition-all cursor-pointer ${
+                      banner === p.url
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

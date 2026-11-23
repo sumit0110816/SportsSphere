@@ -6,8 +6,11 @@ export interface LoggedInCoach {
   sport: string;
   city: string;
   avatar: string;
+  banner?: string;
   bio: string;
 }
+
+export const DEFAULT_COACH_BANNER = 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1600&q=80';
 
 export const getLoggedInCoach = (): LoggedInCoach => {
   if (typeof window !== 'undefined') {
@@ -15,14 +18,16 @@ export const getLoggedInCoach = (): LoggedInCoach => {
     const params = new URLSearchParams(window.location.search);
     const nameParam = params.get('name');
     if (nameParam) {
-      // Read avatar from localStorage auth session (not URL params, as avatar URLs contain '&' that break parsing)
+      // Read avatar and banner from localStorage auth session
       let avatarUrl = '';
+      let bannerUrl = '';
       try {
         const authSession = localStorage.getItem('sportsphere_auth_user');
         if (authSession) {
           const parsed = JSON.parse(authSession);
-          if (parsed.profile && parsed.profile.avatar) {
-            avatarUrl = parsed.profile.avatar;
+          if (parsed.profile) {
+            if (parsed.profile.avatar) avatarUrl = parsed.profile.avatar;
+            if (parsed.profile.banner) bannerUrl = parsed.profile.banner;
           }
         }
       } catch {
@@ -40,6 +45,7 @@ export const getLoggedInCoach = (): LoggedInCoach => {
         sport: params.get('sport') || 'Athletics & Tactical Coaching',
         city: params.get('city') || 'Regional Hub',
         avatar: avatarUrl,
+        banner: bannerUrl || DEFAULT_COACH_BANNER,
         bio: params.get('bio') || 'Certified Coach • Talent Scout & Player Development',
       };
       try {
@@ -56,7 +62,9 @@ export const getLoggedInCoach = (): LoggedInCoach => {
     try {
       const stored = localStorage.getItem('sportsphere_coach_user');
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (!parsed.banner) parsed.banner = DEFAULT_COACH_BANNER;
+        return parsed;
       }
     } catch {
       // ignore
@@ -72,6 +80,7 @@ export const getLoggedInCoach = (): LoggedInCoach => {
     sport: 'Athletics & Player Development',
     city: 'Regional Sports Center',
     avatar: '⏱️',
+    banner: DEFAULT_COACH_BANNER,
     bio: 'Certified Performance Director • Talent Identification & Scouting',
   };
 };

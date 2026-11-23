@@ -105,7 +105,7 @@ export class SportSphereAPI {
       sport: highlightPayload.sport || 'Athletics',
       title: highlightPayload.title,
       caption: highlightPayload.caption,
-      mediaType: highlightPayload.mediaType || 'image',
+      mediaType: highlightPayload.mediaType || (highlightPayload.mediaUrl && (highlightPayload.mediaUrl.endsWith('.mp4') || highlightPayload.mediaUrl.endsWith('.webm') || highlightPayload.mediaUrl.includes('cloudinary') || highlightPayload.mediaUrl.includes('video')) ? 'video' : 'image'),
       mediaUrl: highlightPayload.mediaUrl || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80',
       stats: {
         timing: highlightPayload.timingStat || 'Verified Trial',

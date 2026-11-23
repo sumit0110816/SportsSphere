@@ -5,9 +5,12 @@ export interface LoggedInOrganizer {
   org: string;
   city: string;
   avatar: string;
+  banner?: string;
   bio: string;
   sport: string;
 }
+
+export const DEFAULT_ORGANIZER_BANNER = 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80';
 
 export const getLoggedInOrganizer = (): LoggedInOrganizer => {
   if (typeof window !== 'undefined') {
@@ -15,14 +18,15 @@ export const getLoggedInOrganizer = (): LoggedInOrganizer => {
     const params = new URLSearchParams(window.location.search);
     const nameParam = params.get('name');
     if (nameParam) {
-      // Read avatar from localStorage auth session (not URL params, as avatar URLs contain '&' that break parsing)
       let avatarUrl = '';
+      let bannerUrl = '';
       try {
         const authSession = localStorage.getItem('sportsphere_auth_user');
         if (authSession) {
           const parsed = JSON.parse(authSession);
-          if (parsed.profile && parsed.profile.avatar) {
-            avatarUrl = parsed.profile.avatar;
+          if (parsed.profile) {
+            if (parsed.profile.avatar) avatarUrl = parsed.profile.avatar;
+            if (parsed.profile.banner) bannerUrl = parsed.profile.banner;
           }
         }
       } catch {
@@ -39,6 +43,7 @@ export const getLoggedInOrganizer = (): LoggedInOrganizer => {
         org: params.get('org') || 'Regional Sports Federation',
         city: params.get('city') || 'Regional Hub',
         avatar: avatarUrl,
+        banner: bannerUrl || DEFAULT_ORGANIZER_BANNER,
         bio: params.get('bio') || 'Sports Event Organizer & Tournament Director',
         sport: params.get('sport') || 'Multi-Sport',
       };
@@ -56,7 +61,9 @@ export const getLoggedInOrganizer = (): LoggedInOrganizer => {
     try {
       const stored = localStorage.getItem('sportsphere_organizer_user');
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (!parsed.banner) parsed.banner = DEFAULT_ORGANIZER_BANNER;
+        return parsed;
       }
     } catch {
       // ignore
@@ -71,6 +78,7 @@ export const getLoggedInOrganizer = (): LoggedInOrganizer => {
     org: 'Sportsphere Regional Federation',
     city: 'Regional Sports Hub',
     avatar: '',
+    banner: DEFAULT_ORGANIZER_BANNER,
     bio: 'Official Sports Event Organizer',
     sport: 'Multi-Sport',
   };

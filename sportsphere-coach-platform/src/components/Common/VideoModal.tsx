@@ -75,40 +75,52 @@ export const VideoModal: React.FC<VideoModalProps> = ({ reel, onClose, onBookmar
             </div>
           </div>
 
-          {/* Main Simulated Video Canvas */}
+          {/* Main Video Canvas (Supports Cloudinary Stream & HTML5 Video) */}
           <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden group">
-            <img
-              src={reel.thumbnail}
-              alt={reel.title}
-              className="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-102"
-            />
+            {reel.videoUrl || (reel.thumbnail && reel.thumbnail.endsWith('.mp4')) ? (
+              <video
+                src={reel.videoUrl || reel.thumbnail}
+                controls
+                autoPlay={isPlaying}
+                className="w-full h-full object-contain"
+                poster={reel.thumbnail}
+              />
+            ) : (
+              <>
+                <img
+                  src={reel.thumbnail}
+                  alt={reel.title}
+                  className="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-102"
+                />
 
-            {/* Tactical Vector Simulation Overlay */}
-            {showTacticalOverlay && (
-              <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-85">
-                <defs>
-                  <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#38BDF8" />
-                  </marker>
-                </defs>
-                {/* Simulated Tactical Passing Vector & Pressing Zone */}
-                <circle cx="48%" cy="58%" r="32" fill="none" stroke="#38BDF8" strokeWidth="2" strokeDasharray="4 3" className="animate-pulse" />
-                <path d="M 320 220 Q 380 180 440 210" fill="none" stroke="#FBBF24" strokeWidth="3" markerEnd="url(#arrow)" />
-                <text x="50%" y="30%" fill="#F8FAFC" fontSize="12" fontWeight="700" textAnchor="middle" className="bg-black/60">
-                  DEFENSIVE RECOVERY ZONE
-                </text>
-              </svg>
+                {/* Tactical Vector Simulation Overlay */}
+                {showTacticalOverlay && (
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-85">
+                    <defs>
+                      <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#38BDF8" />
+                      </marker>
+                    </defs>
+                    {/* Simulated Tactical Passing Vector & Pressing Zone */}
+                    <circle cx="48%" cy="58%" r="32" fill="none" stroke="#38BDF8" strokeWidth="2" strokeDasharray="4 3" className="animate-pulse" />
+                    <path d="M 320 220 Q 380 180 440 210" fill="none" stroke="#FBBF24" strokeWidth="3" markerEnd="url(#arrow)" />
+                    <text x="50%" y="30%" fill="#F8FAFC" fontSize="12" fontWeight="700" textAnchor="middle" className="bg-black/60">
+                      DEFENSIVE RECOVERY ZONE
+                    </text>
+                  </svg>
+                )}
+
+                {/* Center Big Play/Pause Toggle on Click */}
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/35 transition-colors group cursor-pointer"
+                >
+                  <div className="w-16 h-16 rounded-full bg-blue-600/90 hover:bg-blue-600 text-white flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110">
+                    {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1" />}
+                  </div>
+                </button>
+              </>
             )}
-
-            {/* Center Big Play/Pause Toggle on Click */}
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/35 transition-colors group cursor-pointer"
-            >
-              <div className="w-16 h-16 rounded-full bg-blue-600/90 hover:bg-blue-600 text-white flex items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110">
-                {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1" />}
-              </div>
-            </button>
 
             {/* Bottom Scrim */}
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />

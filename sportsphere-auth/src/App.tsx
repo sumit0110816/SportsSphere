@@ -8,7 +8,6 @@ import { OrganizerProfileForm } from './components/ProfileSetup/OrganizerProfile
 import { CoachProfileForm } from './components/ProfileSetup/CoachProfileForm';
 import { SuccessScreen } from './components/SuccessScreen';
 import {
-  ROLE_CONFIG,
   type UserRole,
   type AuthMode,
   type AuthStep,
@@ -46,16 +45,7 @@ export const App: React.FC = () => {
     return () => unsubscribe();
   }, [session]);
 
-  // Background ambient particles
-  const particles = Array.from({ length: 16 }, (_, i) => ({
-    id: i,
-    left: `${(i * 6.2) % 100}%`,
-    duration: 14 + (i % 8) * 3,
-    delay: (i % 6) * 1.5,
-    size: 4 + (i % 4) * 2,
-    color: i % 3 === 0 ? 'rgba(8, 145, 178, 0.25)' : i % 3 === 1 ? 'rgba(217, 119, 6, 0.25)' : 'rgba(124, 58, 237, 0.25)',
-  }));
-
+  // Mode toggle
   const handleToggleMode = (newMode: AuthMode) => {
     setMode(newMode);
     setAuthError('');
@@ -238,26 +228,8 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', background: '#F8FAFC' }}>
-      {/* Background with light gradient & grid */}
+      {/* Background with clean light canvas */}
       <div className="auth-bg" />
-
-      {/* Floating particles */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden' }}>
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="particle"
-            style={{
-              left: p.left,
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              backgroundColor: p.color,
-              animationDuration: `${p.duration}s`,
-              animationDelay: `${p.delay}s`,
-            }}
-          />
-        ))}
-      </div>
 
       {/* Top Header */}
       <Header currentRole={selectedRole} mode={mode} onToggleMode={handleToggleMode} />
@@ -276,72 +248,6 @@ export const App: React.FC = () => {
           width: '100%',
         }}
       >
-        {/* Step Indicator (Only during signup flow before success) */}
-        {mode === 'signup' && step !== 'success' && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              marginBottom: '32px',
-              background: '#FFFFFF',
-              padding: '8px 20px',
-              borderRadius: '999px',
-              border: '1.5px solid #E2E8F0',
-              boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div
-                className={`step-dot ${selectedRole ? ROLE_CONFIG[selectedRole].dotClass : 'step-dot-student'} ${
-                  step === 'role' || step === 'credentials' || step === 'profile' ? 'active' : ''
-                }`}
-              />
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
-                1. Role
-              </span>
-            </div>
-
-            <div style={{ width: '24px', height: '1.5px', background: '#CBD5E1' }} />
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div
-                className={`step-dot ${selectedRole ? ROLE_CONFIG[selectedRole].dotClass : 'step-dot-student'} ${
-                  step === 'credentials' || step === 'profile' ? 'active' : ''
-                }`}
-              />
-              <span
-                style={{
-                  fontSize: '12px',
-                  fontWeight: step === 'credentials' || step === 'profile' ? 700 : 500,
-                  color: step === 'credentials' || step === 'profile' ? '#0F172A' : '#94A3B8',
-                }}
-              >
-                2. Credentials
-              </span>
-            </div>
-
-            <div style={{ width: '24px', height: '1.5px', background: '#CBD5E1' }} />
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div
-                className={`step-dot ${selectedRole ? ROLE_CONFIG[selectedRole].dotClass : 'step-dot-student'} ${
-                  step === 'profile' ? 'active' : ''
-                }`}
-              />
-              <span
-                style={{
-                  fontSize: '12px',
-                  fontWeight: step === 'profile' ? 700 : 500,
-                  color: step === 'profile' ? '#0F172A' : '#94A3B8',
-                }}
-              >
-                3. Profile Setup
-              </span>
-            </div>
-          </div>
-        )}
-
         {/* Dynamic view based on step & mode */}
         <AnimatePresence mode="wait">
           {/* STEP 1: Role Selection */}
@@ -459,31 +365,27 @@ export const App: React.FC = () => {
         </AnimatePresence>
       </main>
 
-      {/* Footer */}
+      {/* Clean Enterprise Footer */}
       <footer
         style={{
           width: '100%',
-          padding: '20px 24px',
-          textAlign: 'center',
+          padding: '16px 28px',
           borderTop: '1px solid #E2E8F0',
           background: '#FFFFFF',
           fontSize: '12px',
           color: '#64748B',
           position: 'relative',
           zIndex: 10,
-          boxShadow: '0 -1px 3px rgba(15, 23, 42, 0.02)',
         }}
       >
-        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <span>© 2026 SportSphere Platform Inc. • Firebase Cloud Backend</span>
-          <div style={{ display: 'flex', gap: '18px', fontWeight: 500 }}>
-            <span>Port 3000: Athlete</span>
+        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <span>© 2026 SportSync Universal Athletics Network • AIU Sanctioned • 256-Bit SSL Encrypted</span>
+          <div style={{ display: 'flex', gap: '16px', fontWeight: 500 }}>
+            <span>Privacy Policy</span>
             <span>•</span>
-            <span>Port 3001: Organizer</span>
+            <span>Terms of Service</span>
             <span>•</span>
-            <span>Port 3002: Coach Pro</span>
-            <span>•</span>
-            <span style={{ color: '#0891B2', fontWeight: 700 }}>Port 3003: Auth Portal</span>
+            <span>Security Overview</span>
           </div>
         </div>
       </footer>

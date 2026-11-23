@@ -85,7 +85,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full pt-20 pb-safe">
+      <main className="flex-1 w-full pt-20 md:pt-28 pb-safe pb-20 md:pb-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentTab}

@@ -30,6 +30,7 @@ import {
   MoreHorizontal,
   Briefcase,
   Users,
+  Trash2,
 } from 'lucide-react';
 import { ATHLETES_DATA, HIGHLIGHT_REELS } from '../../data/mockData';
 import { HighlightReel, SportCategory, TabView } from '../../types/sports';
@@ -79,6 +80,106 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [editBio, setEditBio] = useState(coach.bio);
   const [editEmail, setEditEmail] = useState(coach.email);
   const [editAvatar, setEditAvatar] = useState(coach.avatar);
+  const [editBanner, setEditBanner] = useState(coach.banner || '');
+
+  // Coach Career Experience State
+  const [experiences, setExperiences] = useState(() => {
+    try {
+      const stored = localStorage.getItem('sportsphere_coach_experience');
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return [
+      {
+        id: 'exp-c1',
+        role: coach.title || 'Head Athletic Coach & Scouting Director',
+        organization: coach.academy || 'High Performance Academy',
+        duration: 'Current · 3 yrs',
+        location: coach.city || 'Regional Hub',
+        description: `Leading athlete performance, telemetry tracking, and squad development in ${coach.sport || 'Athletics'}.`
+      },
+      {
+        id: 'exp-c2',
+        role: 'Lead Tactical Analyst & Combine Coach',
+        organization: 'State Youth Development Program',
+        duration: '2017 – 2021 · 4 yrs',
+        location: 'Austin, TX',
+        description: 'Conducted standardized radar timing, Vo2 max evaluation, and college showcase matches for 250+ prospects annually.'
+      }
+    ];
+  });
+
+  const [isExpModalOpen, setIsExpModalOpen] = useState(false);
+  const [editingExpId, setEditingExpId] = useState<string | null>(null);
+  const [expRole, setExpRole] = useState('');
+  const [expOrg, setExpOrg] = useState('');
+  const [expDur, setExpDur] = useState('');
+  const [expLoc, setExpLoc] = useState('');
+  const [expDesc, setExpDesc] = useState('');
+
+  const openAddExpModal = () => {
+    setEditingExpId(null);
+    setExpRole('');
+    setExpOrg(coach.academy || '');
+    setExpDur('Current · 1 yr');
+    setExpLoc(coach.city || 'Regional Hub');
+    setExpDesc('');
+    setIsExpModalOpen(true);
+  };
+
+  const openEditExpModal = (item: any) => {
+    setEditingExpId(item.id);
+    setExpRole(item.role || '');
+    setExpOrg(item.organization || '');
+    setExpDur(item.duration || '');
+    setExpLoc(item.location || '');
+    setExpDesc(item.description || '');
+    setIsExpModalOpen(true);
+  };
+
+  const handleSaveExp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expRole.trim() || !expOrg.trim()) {
+      onShowToast('Missing Required Fields', 'Please enter Role and Organization', 'warning');
+      return;
+    }
+
+    let updatedList;
+    if (editingExpId) {
+      updatedList = experiences.map((item: any) =>
+        item.id === editingExpId
+          ? { ...item, role: expRole.trim(), organization: expOrg.trim(), duration: expDur.trim() || 'Present', location: expLoc.trim() || 'Regional Hub', description: expDesc.trim() }
+          : item
+      );
+      onShowToast('Position Updated', 'Career experience updated successfully', 'success');
+    } else {
+      const newItem = {
+        id: 'exp-c-' + Date.now(),
+        role: expRole.trim(),
+        organization: expOrg.trim(),
+        duration: expDur.trim() || 'Present',
+        location: expLoc.trim() || 'Regional Hub',
+        description: expDesc.trim()
+      };
+      updatedList = [newItem, ...experiences];
+      onShowToast('Position Added', 'New career position added to profile', 'success');
+    }
+
+    setExperiences(updatedList);
+    try {
+      localStorage.setItem('sportsphere_coach_experience', JSON.stringify(updatedList));
+    } catch {}
+    setIsExpModalOpen(false);
+  };
+
+  const handleDeleteExp = (id: string) => {
+    if (!window.confirm('Are you sure you want to remove this position?')) return;
+    const updatedList = experiences.filter((item: any) => item.id !== id);
+    setExperiences(updatedList);
+    try {
+      localStorage.setItem('sportsphere_coach_experience', JSON.stringify(updatedList));
+    } catch {}
+    onShowToast('Position Removed', 'Career position deleted', 'info');
+  };
 
   const openEditModal = () => {
     setEditName(coach.name);
@@ -89,6 +190,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     setEditBio(coach.bio);
     setEditEmail(coach.email);
     setEditAvatar(coach.avatar);
+    setEditBanner(coach.banner || '');
     setIsEditModalOpen(true);
   };
 
@@ -108,6 +210,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       bio: editBio.trim(),
       email: editEmail.trim(),
       avatar: editAvatar.trim(),
+      banner: editBanner.trim(),
     };
     try {
       localStorage.setItem('sportsphere_coach_user', JSON.stringify(updated));
@@ -126,6 +229,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         parsed.profile.city = updated.city;
         parsed.profile.bio = updated.bio;
         if (updated.avatar) parsed.profile.avatar = updated.avatar;
+        if (updated.banner) parsed.profile.banner = updated.banner;
         localStorage.setItem('sportsphere_auth_user', JSON.stringify(parsed));
       }
     } catch {}
@@ -133,7 +237,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     setCoach(updated);
     window.dispatchEvent(new Event('coach-profile-updated'));
     setIsEditModalOpen(false);
-    onShowToast('Profile Saved', 'Your coach profile details have been updated successfully', 'success');
+    onShowToast('Profile Saved', 'Your coach profile details and banner have been updated successfully', 'success');
   };
 
   const handleAvatarFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,7 +247,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     reader.onload = (evt) => {
       if (evt.target?.result) {
         setEditAvatar(evt.target.result as string);
-        onShowToast('Image Selected', file.name, 'info');
+        onShowToast('Avatar Selected', file.name, 'info');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBannerFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (evt.target?.result) {
+        setEditBanner(evt.target.result as string);
+        onShowToast('Banner Selected', file.name, 'info');
       }
     };
     reader.readAsDataURL(file);
@@ -337,16 +454,26 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       {/* 1. LinkedIn Top Profile Card */}
       <section className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden relative">
         {/* Cover Banner */}
-        <div className="relative h-36 sm:h-52 bg-gradient-to-r from-[#0037B0] via-[#1E40AF] to-[#047857] overflow-hidden">
-          {/* Subtle Grid / Pitch pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/15 via-transparent to-black/30" />
+        <div className="relative h-36 sm:h-52 bg-slate-900 overflow-hidden">
+          {coach.banner ? (
+            <img
+              src={coach.banner}
+              alt="Coach Cover Banner"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-r from-[#0037B0] via-[#1E40AF] to-[#047857]" />
+          )}
+          {/* Subtle overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <button
               onClick={openEditModal}
-              className="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors cursor-pointer"
-              title="Edit profile & photo"
+              className="p-2 sm:px-3 sm:py-1.5 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-md transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold shadow-lg"
+              title="Edit profile & banner"
             >
               <Camera className="w-4 h-4" />
+              <span className="hidden sm:inline">Edit Banner &amp; Profile</span>
             </button>
           </div>
         </div>
@@ -836,38 +963,60 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
       {/* 6. LinkedIn Experience Section */}
       <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/90 space-y-4">
-        <h3 className="text-base font-bold text-slate-900 font-['Plus_Jakarta_Sans']">
-          Experience
-        </h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-900 font-['Plus_Jakarta_Sans']">
+              Career &amp; Coaching Experience
+            </h3>
+            <span className="text-xs text-blue-600 font-bold">({experiences.length} Positions)</span>
+          </div>
+          <button
+            onClick={openAddExpModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-all cursor-pointer border border-blue-200 shadow-2xs"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Position</span>
+          </button>
+        </div>
 
         <div className="space-y-4 divide-y divide-slate-100">
-          <div className="flex items-start gap-3 pt-2">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 space-y-1 text-xs">
-              <h4 className="font-bold text-sm text-slate-900">{coach.title}</h4>
-              <p className="text-slate-600 font-medium">{coach.academy} · Full-time</p>
-              <p className="text-slate-400 text-[11px]">Current · {coach.city || 'Regional Hub'}</p>
-              <p className="text-slate-600 pt-1 leading-snug">
-                Leading athlete performance, telemetry tracking, and squad development in {coach.sport}.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 pt-4">
-            <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
-              <Award className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 space-y-1 text-xs">
-              <h4 className="font-bold text-sm text-slate-900">Lead Tactical Analyst & Combine Coach</h4>
-              <p className="text-slate-600 font-medium">State Youth Development Program</p>
-              <p className="text-slate-400 text-[11px]">2017 – 2021 · 4 yrs · Austin, TX</p>
-              <p className="text-slate-600 pt-1 leading-snug">
-                Conducted standardized radar timing, Vo2 max evaluation, and college showcase matches for 250+ prospects annually.
-              </p>
-            </div>
-          </div>
+          {experiences.length === 0 ? (
+            <p className="text-xs text-slate-400 py-3">No career experience listed yet. Click "Add Position" above.</p>
+          ) : (
+            experiences.map((exp: any) => (
+              <div key={exp.id} className="flex items-start justify-between gap-3 pt-3 group">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 space-y-1 text-xs">
+                    <h4 className="font-bold text-sm text-slate-900">{exp.role}</h4>
+                    <p className="text-slate-600 font-medium">{exp.organization}</p>
+                    <p className="text-slate-400 text-[11px]">{exp.duration} · {exp.location}</p>
+                    {exp.description && (
+                      <p className="text-slate-600 pt-1 leading-snug">{exp.description}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => openEditExpModal(exp)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                    title="Edit Position"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteExp(exp.id)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    title="Delete Position"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -1223,6 +1372,54 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   </div>
                 </div>
 
+                {/* Cover Banner Selection */}
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+                      Cover Banner (URL or Device Upload)
+                    </label>
+                    <span className="text-[10px] text-slate-400 font-medium">Recommended: 1600x400</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editBanner}
+                      onChange={(e) => setEditBanner(e.target.value)}
+                      placeholder="https://... or choose local file"
+                      className="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white"
+                    />
+                    <label className="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold cursor-pointer shrink-0">
+                      Browse
+                      <input type="file" accept="image/*" className="hidden" onChange={handleBannerFileSelect} />
+                    </label>
+                  </div>
+                  {/* Preset Banner Quick Select */}
+                  <div className="pt-1">
+                    <span className="text-[10px] font-semibold text-slate-500 block mb-1.5">Preset High-Resolution Banners:</span>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[
+                        { label: 'Stadium', url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1600&q=80' },
+                        { label: 'Track Field', url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1600&q=80' },
+                        { label: 'Pitch Turf', url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1600&q=80' },
+                        { label: 'Arena', url: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1600&q=80' }
+                      ].map((preset) => (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          onClick={() => setEditBanner(preset.url)}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border truncate transition-all cursor-pointer ${
+                            editBanner === preset.url
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                   <button
                     type="button"
@@ -1237,6 +1434,117 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Save Coach Profile</span>
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Experience Add/Edit Modal */}
+      <AnimatePresence>
+        {isExpModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs font-['Inter']">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 relative max-h-[92vh] overflow-y-auto"
+            >
+              <button
+                onClick={() => setIsExpModalOpen(false)}
+                className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 font-['Plus_Jakarta_Sans']">
+                    {editingExpId ? 'Edit Career Position' : 'Add Career Position'}
+                  </h3>
+                  <p className="text-xs text-slate-500">Highlight your coaching roles, club leadership, and scouting tenures</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSaveExp} className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Role / Position Title</label>
+                  <input
+                    type="text"
+                    value={expRole}
+                    onChange={(e) => setExpRole(e.target.value)}
+                    placeholder="e.g. Head Coach &amp; Talent Scout"
+                    required
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Club / Academy / Organization</label>
+                  <input
+                    type="text"
+                    value={expOrg}
+                    onChange={(e) => setExpOrg(e.target.value)}
+                    placeholder="e.g. Apex High-Performance Sports Academy"
+                    required
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Duration / Time Period</label>
+                    <input
+                      type="text"
+                      value={expDur}
+                      onChange={(e) => setExpDur(e.target.value)}
+                      placeholder="e.g. 2021 – Present · 3 yrs"
+                      required
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">City / Location</label>
+                    <input
+                      type="text"
+                      value={expLoc}
+                      onChange={(e) => setExpLoc(e.target.value)}
+                      placeholder="e.g. Regional Sports Complex"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Responsibilities &amp; Achievements</label>
+                  <textarea
+                    rows={3}
+                    value={expDesc}
+                    onChange={(e) => setExpDesc(e.target.value)}
+                    placeholder="Describe your squad management, tactical periodization, tournament victories, or prospect scouting..."
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsExpModalOpen(false)}
+                    className="py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="py-2 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold font-['Plus_Jakarta_Sans'] flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{editingExpId ? 'Save Position' : 'Add Position'}</span>
                   </button>
                 </div>
               </form>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GraduationCap, Building2, Dumbbell, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
+import { GraduationCap, Building2, Dumbbell, CheckCircle2, ArrowRight } from 'lucide-react';
 import { ROLE_CONFIG, type UserRole } from '../types/auth';
 
 interface RoleSelectorProps {
@@ -16,72 +16,51 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
   onContinue,
   onSwitchToLogin,
 }) => {
-  const roles: { id: UserRole; icon: React.ReactNode; glowColor: string }[] = [
+  const roles: { id: UserRole; icon: React.ReactNode; color: string; badge: string; description: string; highlights: string[] }[] = [
     {
       id: 'student',
-      icon: <GraduationCap size={32} color="#0891B2" />,
-      glowColor: 'rgba(8, 145, 178, 0.2)',
+      icon: <GraduationCap size={24} color="#0284C7" />,
+      color: '#0284C7',
+      badge: 'VARSITY ATHLETE',
+      description: 'Compete in sanctioned tournaments, build your verified sports CV, and showcase verified trial metrics to university recruiters.',
+      highlights: ['Tournament entries & check-in', 'Verified timing & personal records', 'Scout & coach discovery network', 'Media highlight reels feed'],
     },
     {
       id: 'organizer',
-      icon: <Building2 size={32} color="#D97706" />,
-      glowColor: 'rgba(217, 119, 6, 0.2)',
+      icon: <Building2 size={24} color="#D97706" />,
+      color: '#D97706',
+      badge: 'MEET DIRECTOR',
+      description: 'Sanction and direct varsity competitions, generate automated seedings and brackets, manage team rosters, and publish live results.',
+      highlights: ['Meet sanctioning & scheduling', 'Automated bracket generation', 'Referee & field assignments', 'Real-time scorecard publishing'],
     },
     {
       id: 'coach',
-      icon: <Dumbbell size={32} color="#7C3AED" />,
-      glowColor: 'rgba(124, 58, 237, 0.2)',
+      icon: <Dumbbell size={24} color="#4F46E5" />,
+      color: '#4F46E5',
+      badge: 'VARSITY COACH & SCOUT',
+      description: 'Scout verified athletic talent across regional circuits, review tactical match footage, and manage varsity squad depth charts.',
+      highlights: ['Athlete scouting radar & telemetry', 'Film sessions & match reviews', 'Roster & depth chart control', 'Sanctioned competition calendar'],
     },
   ];
 
   return (
     <div style={{ maxWidth: '960px', margin: '0 auto', width: '100%' }}>
-      {/* Top headline */}
-      <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '999px',
-            background: '#FFFFFF',
-            border: '1px solid #CBD5E1',
-            fontSize: '12px',
-            fontWeight: 700,
-            color: '#334155',
-            marginBottom: '16px',
-            boxShadow: '0 2px 6px rgba(15, 23, 42, 0.04)',
-          }}
-        >
-          <Sparkles size={14} color="#0891B2" />
-          <span>Step 1 of 3: Select Your Ecosystem Role</span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+      {/* Header section */}
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <h1
           style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(28px, 4vw, 42px)',
+            fontSize: 'clamp(26px, 3.5vw, 34px)',
             fontWeight: 800,
-            letterSpacing: '-0.02em',
-            margin: '0 0 12px',
+            letterSpacing: '-0.025em',
+            margin: '0 0 10px',
             color: '#0F172A',
           }}
         >
-          How will you experience{' '}
-          <span className="shimmer-text">SportSphere</span>?
-        </motion.h1>
+          Select Your Account Type
+        </h1>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+        <p
           style={{
             fontSize: '15px',
             color: '#475569',
@@ -90,8 +69,8 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
             lineHeight: 1.5,
           }}
         >
-          Select your primary identity. We tailor your onboarding, profile credentials, and direct access to your dedicated workspace.
-        </motion.p>
+          Choose your primary role within the SportSync varsity athletic network to access your dedicated workspace and tools.
+        </p>
       </div>
 
       {/* Role Cards Grid */}
@@ -99,20 +78,20 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '20px',
-          marginBottom: '32px',
+          gap: '18px',
+          marginBottom: '28px',
         }}
       >
-        {roles.map(({ id, icon, glowColor }, index) => {
+        {roles.map(({ id, icon, color, badge, description, highlights }, index) => {
           const config = ROLE_CONFIG[id];
           const isSelected = selectedRole === id;
 
           return (
             <motion.div
               key={id}
-              initial={{ opacity: 0, y: 25 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.1 * index }}
+              transition={{ duration: 0.3, delay: 0.08 * index }}
               onClick={() => onSelectRole(id)}
               className={`role-card ${isSelected ? config.borderClass : ''}`}
               style={{
@@ -120,45 +99,43 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                minHeight: '340px',
-                textAlign: 'left',
+                minHeight: '320px',
                 borderWidth: isSelected ? '2px' : '1.5px',
-                transform: isSelected ? 'translateY(-4px)' : 'none',
+                borderColor: isSelected ? color : '#E2E8F0',
+                background: isSelected ? '#FFFFFF' : '#FFFFFF',
               }}
             >
-              {/* Top selected badge */}
+              {/* Selected badge */}
               {isSelected && (
                 <div
                   style={{
                     position: 'absolute',
-                    top: '14px',
-                    right: '14px',
+                    top: '16px',
+                    right: '16px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
-                    background: config.accentBg,
-                    border: `1.5px solid ${config.color}`,
-                    color: config.color,
-                    padding: '3px 10px',
-                    borderRadius: '999px',
+                    background: '#EFF6FF',
+                    border: `1px solid ${color}`,
+                    color: color,
+                    padding: '3px 8px',
+                    borderRadius: '6px',
                     fontSize: '11px',
-                    fontWeight: 800,
+                    fontWeight: 700,
                   }}
                 >
                   <CheckCircle2 size={13} />
-                  SELECTED
+                  <span>Selected</span>
                 </div>
               )}
 
               <div>
-                {/* Icon orb */}
+                {/* Icon */}
                 <div
                   className="icon-orb"
                   style={{
-                    margin: '0 0 16px 0',
-                    background: isSelected ? config.accentBg : '#F8FAFC',
-                    border: `1px solid ${isSelected ? config.color : '#E2E8F0'}`,
-                    boxShadow: isSelected ? `0 0 20px ${glowColor}` : 'none',
+                    background: isSelected ? `${color}15` : '#F8FAFC',
+                    border: `1px solid ${isSelected ? `${color}35` : '#E2E8F0'}`,
                   }}
                 >
                   {icon}
@@ -170,42 +147,43 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
                     display: 'inline-block',
                     fontSize: '11px',
                     fontWeight: 800,
-                    letterSpacing: '0.06em',
-                    color: config.color,
-                    marginBottom: '6px',
+                    letterSpacing: '0.05em',
+                    color: color,
+                    marginBottom: '4px',
                   }}
                 >
-                  {config.badge}
+                  {badge}
                 </span>
 
                 {/* Role title */}
                 <h3
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '22px',
+                    fontSize: '20px',
                     fontWeight: 800,
                     color: '#0F172A',
                     margin: '0 0 8px',
+                    letterSpacing: '-0.01em',
                   }}
                 >
                   {config.title}
                 </h3>
 
-                {/* Tagline */}
+                {/* Tagline / Description */}
                 <p
                   style={{
                     fontSize: '13px',
                     color: '#64748B',
-                    lineHeight: 1.4,
-                    marginBottom: '18px',
+                    lineHeight: 1.45,
+                    marginBottom: '16px',
                   }}
                 >
-                  {config.tagline}
+                  {description}
                 </p>
 
                 {/* Features list */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {config.features.map((feat, i) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                  {highlights.map((feat, i) => (
                     <div
                       key={i}
                       style={{
@@ -219,10 +197,10 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
                     >
                       <div
                         style={{
-                          width: '6px',
-                          height: '6px',
+                          width: '5px',
+                          height: '5px',
                           borderRadius: '50%',
-                          background: config.color,
+                          background: color,
                           flexShrink: 0,
                         }}
                       />
@@ -232,11 +210,11 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
                 </div>
               </div>
 
-              {/* Bottom Target Dashboard indicator */}
+              {/* Destination workspace */}
               <div
                 style={{
-                  marginTop: '20px',
-                  paddingTop: '14px',
+                  marginTop: '18px',
+                  paddingTop: '12px',
                   borderTop: '1px solid #F1F5F9',
                   display: 'flex',
                   alignItems: 'center',
@@ -244,20 +222,10 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
                 }}
               >
                 <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 500 }}>
-                  Workspace: <strong style={{ color: config.color, fontWeight: 700 }}>Port {config.port}</strong>
+                  Workspace: <strong style={{ color: color, fontWeight: 700 }}>{config.badge}</strong>
                 </span>
-                <span
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: isSelected ? config.color : '#64748B',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
-                >
-                  {isSelected ? 'Ready' : 'Choose'}
-                  <ArrowRight size={13} />
+                <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 500 }}>
+                  Direct Access
                 </span>
               </div>
             </motion.div>
@@ -265,54 +233,59 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({
         })}
       </div>
 
-      {/* Action bar */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
+      {/* Bottom Action Footer */}
+      <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '14px',
+          gap: '12px',
         }}
       >
         <button
-          disabled={!selectedRole}
           onClick={onContinue}
-          className={`btn-primary ${selectedRole ? ROLE_CONFIG[selectedRole].btnClass : ''}`}
+          disabled={!selectedRole}
           style={{
-            maxWidth: '360px',
-            opacity: selectedRole ? 1 : 0.45,
-            cursor: selectedRole ? 'pointer' : 'not-allowed',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
+            padding: '13px 32px',
+            borderRadius: '10px',
+            background: selectedRole ? '#1D4ED8' : '#94A3B8',
+            color: '#FFFFFF',
+            fontFamily: 'var(--font-display)',
+            fontSize: '14px',
+            fontWeight: 700,
+            border: 'none',
+            cursor: selectedRole ? 'pointer' : 'not-allowed',
+            boxShadow: selectedRole ? '0 2px 8px rgba(29, 78, 216, 0.3)' : 'none',
+            transition: 'all 0.15s ease',
+            opacity: selectedRole ? 1 : 0.6,
           }}
         >
-          <span>Continue as {selectedRole ? ROLE_CONFIG[selectedRole].title : '...'}</span>
-          <ArrowRight size={18} />
+          <span>Continue to Account Credentials</span>
+          <ArrowRight size={16} />
         </button>
 
-        <p style={{ fontSize: '13px', color: '#64748B' }}>
+        <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
           Already have an account?{' '}
           <button
             onClick={onSwitchToLogin}
             style={{
               background: 'none',
               border: 'none',
-              color: '#0891B2',
+              color: '#1D4ED8',
               fontWeight: 700,
               cursor: 'pointer',
               textDecoration: 'underline',
               padding: 0,
             }}
           >
-            Sign in here
+            Sign In here
           </button>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 };

@@ -585,7 +585,7 @@ export const NEWS_BULLETINS: NewsBulletin[] = [
     timestamp: '5h ago',
     scope: 'national',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCO91nn8CvyX9wzqEkylfrMjAv52UdjP5w-uI5XkW4qEiwzvy59AJjzqeKl_V-Q1ZEvPPyi2g1dy80MtHUWafP1pzYccj4hcehawW1wdcorZthdtG58YBx8KuwnH1xVvT_djKuSCCi_NnjmdwGuhWcFTnIZxQif1FrQdqGJJPSgYw3l7naFALA4lEmQOfycEI1lb17y6CLXf7O7c5GQ_fiUxtaHogyOD4hF382w-i0J2XfVX-CseiYYaA',
-    fullBody: 'Twelve zonal centers across the country will host open combine trials for bowlers recording >130 km/h radar velocities and top-order run scorers. High-speed ball-tracking cameras and force plate sensors will evaluate biomechanical efficiency and seam stability. Certified coaches can submit nominations through the SportSphere platform portal.',
+    fullBody: 'Twelve zonal centers across the country will host open combine trials for bowlers recording >130 km/h radar velocities and top-order run scorers. High-speed ball-tracking cameras and force plate sensors will evaluate biomechanical efficiency and seam stability. Certified coaches can submit nominations through the SportSync platform portal.',
   },
   {
     id: 'news-5',

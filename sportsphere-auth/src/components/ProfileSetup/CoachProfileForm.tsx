@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import { ROLE_CONFIG, type CoachProfileData } from '../../types/auth';
 
 interface CoachProfileFormProps {
@@ -117,8 +117,8 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
               marginBottom: '10px',
             }}
           >
-            <Sparkles size={12} />
-            Step 3 of 3 • Coach Pro Hub Profile
+            <ShieldCheck size={12} />
+            Step 3 of 3 • Coach Profile
           </div>
 
           <h2

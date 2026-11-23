@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import { ROLE_CONFIG, type OrganizerProfileData } from '../../types/auth';
 
 interface OrganizerProfileFormProps {
@@ -115,8 +115,8 @@ export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
               marginBottom: '10px',
             }}
           >
-            <Sparkles size={12} />
-            Step 3 of 3 • Organizer Studio Profile
+            <ShieldCheck size={12} />
+            Step 3 of 3 • Organizer Profile
           </div>
 
           <h2

@@ -41,7 +41,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       status: 'Open',
     });
 
-    showToast(`"${title}" published to SportSphere!`);
+    showToast(`"${title}" published to SportSync!`);
     setTitle('');
     onClose();
   };

@@ -5,19 +5,16 @@ import {
   Plus, 
   Bell, 
   HelpCircle, 
-  CheckCircle2, 
-  ExternalLink,
   Sparkles,
   Menu,
   X,
   LogOut
 } from 'lucide-react';
-import { UserRole, ViewId } from '../../types';
+import { ViewId } from '../../types';
 import { getLoggedInOrganizer } from '../../utils/userSession';
 
 interface HeaderProps {
-  currentRole: UserRole;
-  onRoleChange: (role: UserRole) => void;
+  currentView: ViewId;
   onOpenCreateModal: () => void;
   onOpenCmdPalette: () => void;
   onNavigate: (view: ViewId) => void;
@@ -27,9 +24,16 @@ interface HeaderProps {
   onToggleMobileSidebar?: () => void;
 }
 
+// Nav tabs shown directly in the header (coach-style pill nav)
+const HEADER_NAV_TABS: { id: ViewId; label: string }[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'events', label: 'My Events' },
+  { id: 'registrations', label: 'Registrations' },
+  { id: 'announcements', label: 'Announcements' },
+];
+
 export const Header: React.FC<HeaderProps> = ({
-  currentRole,
-  onRoleChange,
+  currentView,
   onOpenCreateModal,
   onOpenCmdPalette,
   onNavigate,
@@ -73,10 +77,10 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-xs">
       <div className="px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Logo & Mobile Toggle */}
-        <div className="flex items-center gap-2 sm:gap-6 min-w-max">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-max">
           {/* Mobile Hamburger Menu Button */}
           {onToggleMobileSidebar && (
             <button
@@ -92,46 +96,55 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
+          {/* Brand Logo */}
           <button
             onClick={() => onNavigate('overview')}
             className="flex items-center gap-2 sm:gap-2.5 group text-left focus:outline-hidden cursor-pointer transition-transform duration-200 active:scale-95"
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 group-hover:shadow-blue-500/40 transition-all duration-200">
-              <Globe className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 group-hover:rotate-12" strokeWidth={2.2} />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-[#0037B0] to-[#1D4ED8] flex items-center justify-center text-white shadow-sm shadow-blue-500/20 group-hover:scale-105 transition-transform">
+              <Globe className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:rotate-12" strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[17px] sm:text-[19px] font-bold tracking-tight text-slate-900 leading-none group-hover:text-blue-600 transition-colors">
-                SportSphere
+              <div className="font-['Plus_Jakarta_Sans'] font-extrabold text-base tracking-tight text-[#131B2E] group-hover:text-blue-700 transition-colors leading-none">
+                SportSync
               </div>
-              <div className="hidden sm:block text-[10px] text-slate-400 font-medium tracking-wide leading-none mt-1">
-                Universal Sports &amp; Talent Platform
+              <div className="hidden sm:block text-[10px] font-bold text-blue-600 uppercase tracking-widest leading-none mt-0.5">
+                Organizer Portal
               </div>
             </div>
           </button>
 
-          {/* Role Switcher Pills */}
-          <nav className="hidden md:flex items-center bg-slate-100 p-1 rounded-full text-xs font-semibold text-slate-600 border border-slate-200/80">
-            {(['Athlete', 'Organizer', 'Coach'] as UserRole[]).map((role) => (
-              <button
-                key={role}
-                onClick={() => {
-                  onRoleChange(role);
-                  showToast(`Switched to ${role} Portal View`);
-                }}
-                className={`px-3.5 py-1.5 rounded-full cursor-pointer transition-all duration-200 active:scale-95 ${
-                  currentRole === role
-                    ? 'bg-blue-600 text-white shadow-xs font-semibold scale-100'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                }`}
-              >
-                {role}
-              </button>
-            ))}
+          {/* Header Nav Tabs — Coach-style pill nav (Desktop lg+) */}
+          <nav className="hidden lg:flex items-center gap-1 bg-[#EAEDFF]/70 p-1 rounded-full border border-slate-200/50 ml-2">
+            {HEADER_NAV_TABS.map((tab) => {
+              const isActive = currentView === tab.id;
+              const hasBadge = tab.id === 'registrations' && pendingApprovalsCount > 0;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onNavigate(tab.id)}
+                  className={`relative px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+                    isActive
+                      ? 'bg-[#1D4ED8] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  {tab.label}
+                  {hasBadge && (
+                    <span className={`ml-1.5 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded-full leading-none ${
+                      isActive ? 'bg-white/25 text-white' : 'bg-rose-600 text-white'
+                    }`}>
+                      {pendingApprovalsCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
         {/* Global Search Bar Trigger (Desktop) */}
-        <div className="flex-1 max-w-xl mx-2 relative hidden lg:block">
+        <div className="flex-1 max-w-md mx-2 relative hidden xl:block">
           <div
             onClick={onOpenCmdPalette}
             className="relative flex items-center cursor-pointer group transition-all duration-200 active:scale-[0.99]"
@@ -141,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
             <input
               className="w-full bg-slate-100/80 hover:bg-slate-100 text-xs border border-transparent hover:border-blue-300 transition-all duration-200 rounded-full pl-9 pr-14 py-2 cursor-pointer outline-hidden text-slate-700 placeholder:text-slate-400 shadow-2xs hover:shadow-xs"
-              placeholder="Search events, registrations, teams... (Press ⌘K)"
+              placeholder="Search events, registrations, teams... (⌘K)"
               readOnly
             />
             <span className="absolute right-3 inline-flex items-center px-1.5 py-0.5 border border-slate-300 rounded text-[10px] text-slate-500 font-medium bg-white shadow-2xs pointer-events-none group-hover:border-blue-300 group-hover:text-blue-600 transition-colors">
@@ -151,28 +164,28 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Action Items & User Profile */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Mobile Search Icon Button */}
           <button
             onClick={onOpenCmdPalette}
-            className="lg:hidden p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 active:scale-90 rounded-full transition-all cursor-pointer"
+            className="xl:hidden p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 active:scale-90 rounded-full transition-all cursor-pointer"
             title="Search (⌘K)"
             aria-label="Search"
           >
             <Search className="w-5 h-5" />
           </button>
 
-          {/* Create Event Button with shine and tactile press */}
+          {/* Create Event Button */}
           <button
             onClick={onOpenCreateModal}
             className="btn-shine btn-interactive btn-pulse inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm shadow-blue-600/30 cursor-pointer"
           >
             <Plus className="w-4 h-4 transition-transform duration-200" strokeWidth={2.5} />
-            <span className="hidden xs:inline sm:inline">Create Event</span>
-            <span className="xs:hidden sm:hidden inline">Create</span>
+            <span className="hidden sm:inline">Create Event</span>
+            <span className="sm:hidden inline">Create</span>
           </button>
 
-          {/* Organizer Credits Pill with interactive popover */}
+          {/* Organizer Credits Pill */}
           <div className="relative hidden xl:block" ref={creditsRef}>
             <button
               onClick={() => setShowCreditsPopover(!showCreditsPopover)}
@@ -196,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </svg>
               </div>
               <span className="text-[11px] font-medium text-slate-600">
-                Organizer Credits <strong className="text-blue-700 font-bold">3 / 10</strong> Events
+                Credits <strong className="text-blue-700 font-bold">3 / 10</strong>
               </span>
             </button>
 
@@ -232,7 +245,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* Notifications Bell Icon */}
+          {/* Notifications Bell */}
           <div className="relative" ref={notifRef}>
             <button
               aria-label="Notifications"
@@ -363,7 +376,7 @@ export const Header: React.FC<HeaderProps> = ({
                 }, 350);
               }}
               title="Log out from SportSphere"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-colors cursor-pointer active:scale-95 shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-colors cursor-pointer active:scale-95 shadow-2xs mt-1"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -372,27 +385,32 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Mobile Role Switcher Bar on Phones */}
-      <div className="md:hidden px-3 py-1.5 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-1 overflow-x-auto">
-        <span className="text-[11px] font-semibold text-slate-500 pl-1">Role:</span>
-        <div className="flex items-center gap-1">
-          {(['Athlete', 'Organizer', 'Coach'] as UserRole[]).map((role) => (
+      {/* Mobile Tab Bar (phones: show the 4 header nav tabs) */}
+      <div className="lg:hidden px-3 py-1.5 bg-slate-50/80 border-t border-slate-200/80 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+        {HEADER_NAV_TABS.map((tab) => {
+          const isActive = currentView === tab.id;
+          const hasBadge = tab.id === 'registrations' && pendingApprovalsCount > 0;
+          return (
             <button
-              key={role}
-              onClick={() => {
-                onRoleChange(role);
-                showToast(`Switched to ${role} Portal View`);
-              }}
-              className={`px-3 py-1 rounded-full text-xs cursor-pointer transition-all duration-150 active:scale-95 ${
-                currentRole === role
-                  ? 'bg-blue-600 text-white font-semibold shadow-2xs'
+              key={tab.id}
+              onClick={() => onNavigate(tab.id)}
+              className={`flex-shrink-0 relative px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                isActive
+                  ? 'bg-[#1D4ED8] text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
               }`}
             >
-              {role}
+              {tab.label}
+              {hasBadge && (
+                <span className={`ml-1 inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full leading-none ${
+                  isActive ? 'bg-white/25 text-white' : 'bg-rose-600 text-white'
+                }`}>
+                  {pendingApprovalsCount}
+                </span>
+              )}
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </header>
   );

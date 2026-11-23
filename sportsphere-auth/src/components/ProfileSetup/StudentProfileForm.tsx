@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 import { ROLE_CONFIG, type StudentProfileData } from '../../types/auth';
 
 interface StudentProfileFormProps {
@@ -119,8 +119,8 @@ export const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
               marginBottom: '10px',
             }}
           >
-            <Sparkles size={12} />
-            Step 3 of 3 • Student Athlete Profile
+            <ShieldCheck size={12} />
+            Step 3 of 3 • Athlete Profile
           </div>
 
           <h2
