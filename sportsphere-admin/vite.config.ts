@@ -155,6 +155,7 @@ function sharedSyncPlugin(): Plugin {
 export default defineConfig({
   plugins: [react(), sharedSyncPlugin()],
   server: {
+    host: true,
     port: 3003,
   },
 });
