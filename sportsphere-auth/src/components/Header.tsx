@@ -5,9 +5,10 @@ interface HeaderProps {
   currentRole?: UserRole | null;
   mode: 'signup' | 'login';
   onToggleMode: (mode: 'signup' | 'login') => void;
+  onOpenAdmin?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ mode, onToggleMode }) => {
+export const Header: React.FC<HeaderProps> = ({ mode, onToggleMode, onOpenAdmin }) => {
   return (
     <>
       <header style={{
@@ -76,8 +77,8 @@ export const Header: React.FC<HeaderProps> = ({ mode, onToggleMode }) => {
           </div>
         </div>
 
-        {/* Right side simple auth link */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        {/* Right side simple auth link and admin switcher */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button
             type="button"
             onClick={() => onToggleMode(mode === 'signup' ? 'login' : 'signup')}
@@ -97,6 +98,28 @@ export const Header: React.FC<HeaderProps> = ({ mode, onToggleMode }) => {
               <span>Need an account? <strong style={{ color: '#1D4ED8', fontWeight: 600 }}>Create Account</strong></span>
             )}
           </button>
+
+          {onOpenAdmin && (
+            <button
+              type="button"
+              onClick={onOpenAdmin}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                background: '#0F172A',
+                color: '#FFFFFF',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <span>Admin Console</span>
+            </button>
+          )}
         </div>
       </header>
     </>
