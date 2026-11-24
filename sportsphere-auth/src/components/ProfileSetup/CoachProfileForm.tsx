@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import {
+  ShieldCheck,
+  ArrowRight,
+  ArrowLeft,
+  Mail,
+  Phone,
+  Award,
+  Upload,
+  CheckCircle,
+  FileText,
+  AlertCircle,
+  Trophy,
+} from 'lucide-react';
 import { ROLE_CONFIG, type CoachProfileData } from '../../types/auth';
 
 interface CoachProfileFormProps {
@@ -10,10 +22,6 @@ interface CoachProfileFormProps {
   onSubmit: (profile: CoachProfileData) => void;
 }
 
-const AVATAR_PRESETS = [
-  '⏱️', '🥋', '🥊', '🎯', '🏅', '📋', '🔥', '🧠'
-];
-
 export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
   initialEmail,
   initialName = '',
@@ -22,51 +30,117 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
 }) => {
   const config = ROLE_CONFIG.coach;
 
-  const defaultName = initialName || (initialEmail ? initialEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '');
+  const defaultName =
+    initialName ||
+    (initialEmail ? initialEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()) : '');
 
   const [fullName, setFullName] = useState(defaultName);
-  const [title, setTitle] = useState('');
+  const [email, setEmail] = useState(initialEmail || '');
+  const [contactNumber, setContactNumber] = useState('+91 99223 34455');
   const [primarySport, setPrimarySport] = useState('Athletics / Track & Field');
-  const [specialization, setSpecialization] = useState('');
-  const [yearsOfExperience, setYearsOfExperience] = useState('4-7 Years');
-  const [certification, setCertification] = useState('');
-  const [currentAcademy, setCurrentAcademy] = useState('');
-  const [city, setCity] = useState('');
-  const [linkedinUrl, setLinkedinUrl] = useState('');
-  const [bio, setBio] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState('⏱️');
-  const [error, setError] = useState('');
+  const [certification, setCertification] = useState('AFI Level-2 & World Athletics Certified Coach');
+  const [licenseNo, setLicenseNo] = useState('WA-IND-2024-891');
+  const [currentAcademy, setCurrentAcademy] = useState('Delhi University Sports Council & Elite Track Club');
+  const [yearsOfExperience, setYearsOfExperience] = useState('5-8 Years');
+  const [specialization, setSpecialization] = useState('Sprint Mechanics & Relay Transitions');
+  const [bio, setBio] = useState('Certified athletic coach training collegiate athletes for national inter-university meets.');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Certificate Document Upload & Preview
+  const [certificateDocName, setCertificateDocName] = useState('AFI_Level2_Coach_Certificate.pdf');
+  const [coachCertificateUrl, setCoachCertificateUrl] = useState(
+    'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80'
+  );
+
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // File picker handler for Coach Certificate
+  const handleCertUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCertificateDocName(file.name);
+      const fakeUrl = URL.createObjectURL(file);
+      setCoachCertificateUrl(fakeUrl);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     if (!fullName.trim()) {
-      setError('Please provide your full name');
+      setError('Please provide your full legal name');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setError('Please provide your professional coaching email');
+      return;
+    }
+    if (!contactNumber.trim() || contactNumber.length < 8) {
+      setError('Please provide a valid contact phone number');
       return;
     }
     if (!primarySport.trim()) {
-      setError('Please specify your coaching sport');
+      setError('Please specify your coaching sport discipline');
+      return;
+    }
+    if (!licenseNo.trim()) {
+      setError('Please enter your federation license or certificate credential number');
       return;
     }
 
-    onSubmit({
+    setIsSubmitting(true);
+
+    const profileData: CoachProfileData = {
       fullName: fullName.trim(),
-      title: title.trim() || 'Head Coach',
-      primarySport,
-      specialization: specialization.trim(),
-      yearsOfExperience,
+      email: email.trim(),
+      contactNumber: contactNumber.trim(),
+      primarySport: primarySport.trim(),
       certification: certification.trim(),
+      licenseNo: licenseNo.trim(),
       currentAcademy: currentAcademy.trim(),
-      city: city.trim(),
-      linkedinUrl: linkedinUrl.trim(),
+      yearsOfExperience,
+      specialization: specialization.trim(),
+      coachCertificateUrl,
+      title: 'Head Coach',
+      city: 'New Delhi',
       bio: bio.trim(),
-      avatar: selectedAvatar && selectedAvatar.startsWith('http')
-        ? selectedAvatar
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName.trim())}&background=2563eb&color=fff&size=256&bold=true`,
-    });
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        fullName.trim()
+      )}&background=2563eb&color=fff&size=256&bold=true`,
+    };
+
+    // Send to sync backend for instantaneous Platform Admin verification
+    try {
+      await fetch('/api/sync/submit-coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: profileData.fullName,
+          email: profileData.email,
+          phone: profileData.contactNumber,
+          contactNumber: profileData.contactNumber,
+          sport: profileData.primarySport,
+          collegeOrOrg: profileData.currentAcademy,
+          experienceYears: profileData.yearsOfExperience,
+          certification: profileData.certification,
+          licenseNo: profileData.licenseNo,
+          coachCertificateUrl,
+          documents: [
+            { name: certificateDocName, url: coachCertificateUrl, type: 'pdf', size: '2.4 MB' },
+          ],
+        }),
+      });
+    } catch {
+      // Local sync fallback
+    }
+
+    setIsSubmitting(false);
+    onSubmit(profileData);
   };
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
+    <div style={{ maxWidth: '680px', margin: '0 auto', width: '100%' }}>
       {/* Back button */}
       <button
         onClick={onBack}
@@ -99,7 +173,7 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
         }}
       >
         {/* Step Indicator & Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div
             style={{
               display: 'inline-flex',
@@ -118,56 +192,41 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
             }}
           >
             <ShieldCheck size={12} />
-            Step 3 of 3 • Coach Profile
+            Coach Accreditation Dossier • Admin Gated
           </div>
 
           <h2
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '26px',
+              fontSize: '24px',
               fontWeight: 800,
               color: '#0F172A',
               margin: '0 0 6px',
             }}
           >
-            Build Your Coach Pro Profile
+            Coach Certification & License Verification
           </h2>
           <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-            Account: <strong style={{ color: config.color }}>{initialEmail || 'coach@sportsphere.org'}</strong>
+            Upload your coaching accreditation, national federation license, and varsity credentials. Platform Admin must approve your dossier before access to Coach Pro Hub (Port 3002) is unlocked.
           </p>
         </div>
 
-        {/* Avatar Preset Selector */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px' }}>
-          <label className="field-label" style={{ marginBottom: '10px' }}>Select Coach Profile Icon</label>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {AVATAR_PRESETS.map((icon) => {
-              const isSelected = selectedAvatar === icon;
-              return (
-                <button
-                  key={icon}
-                  type="button"
-                  onClick={() => setSelectedAvatar(icon)}
-                  style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '50%',
-                    background: isSelected ? '#FAF5FF' : '#F1F5F9',
-                    border: `2px solid ${isSelected ? '#7C3AED' : '#CBD5E1'}`,
-                    fontSize: '22px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transform: isSelected ? 'scale(1.12)' : 'scale(1)',
-                    boxShadow: isSelected ? '0 0 16px rgba(124, 58, 237, 0.25)' : 'none',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {icon}
-                </button>
-              );
-            })}
+        {/* Verification Policy Banner */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+            padding: '12px 16px',
+            borderRadius: '10px',
+            backgroundColor: '#EFF6FF',
+            border: '1px solid #BFDBFE',
+            marginBottom: '22px',
+          }}
+        >
+          <AlertCircle size={18} color="#2563EB" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ fontSize: '12.5px', color: '#1E40AF', lineHeight: 1.45 }}>
+            <strong>Federation Accreditation Standard:</strong> Only verified coaches with authentic AFI, FIBA, BWF, or NIS Patiala credentials are authorized to scout athletes and endorse performance metrics.
           </div>
         </div>
 
@@ -189,7 +248,7 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          {/* Row 1: Full name and title */}
+          {/* Row 1: Full Name & Primary Sport */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div>
               <label className="field-label">Coach Full Name *</label>
@@ -197,59 +256,118 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
+                placeholder="Coach Legal Full Name"
                 className="auth-input auth-input-coach"
                 required
               />
             </div>
             <div>
-              <label className="field-label">Professional Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Head Coach / High-Performance Lead"
-                className="auth-input auth-input-coach"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: Primary Sport & Specialization */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <div>
-              <label className="field-label">Primary Coaching Sport *</label>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Trophy size={13} color="#2563EB" />
+                Primary Sport Discipline *
+              </label>
               <select
                 value={primarySport}
                 onChange={(e) => setPrimarySport(e.target.value)}
                 className="auth-input auth-select auth-input-coach"
               >
                 <option value="Athletics / Track & Field">Athletics / Track & Field</option>
-                <option value="Football / Soccer">Football / Soccer</option>
-                <option value="Badminton">Badminton</option>
                 <option value="Basketball">Basketball</option>
+                <option value="Badminton">Badminton</option>
+                <option value="Football / Soccer">Football / Soccer</option>
                 <option value="Cricket">Cricket</option>
                 <option value="Tennis">Tennis</option>
                 <option value="Swimming">Swimming</option>
-                <option value="Strength & Conditioning">Strength & Conditioning</option>
-                <option value="Martial Arts & Combat">Martial Arts & Combat</option>
+                <option value="Volleyball">Volleyball</option>
               </select>
             </div>
+          </div>
+
+          {/* Row 2: Email & Contact Number */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '14px' }}>
             <div>
-              <label className="field-label">Tactical Specialization</label>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Mail size={13} color="#2563EB" />
+                Coach Professional Email *
+              </label>
               <input
-                type="text"
-                value={specialization}
-                onChange={(e) => setSpecialization(e.target.value)}
-                placeholder="e.g. Sprint Mechanics / Playmaking"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="coach.name@academy.com"
                 className="auth-input auth-input-coach"
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Phone size={13} color="#2563EB" />
+                Contact Number *
+              </label>
+              <input
+                type="tel"
+                value={contactNumber}
+                onChange={(e) => setContactNumber(e.target.value)}
+                placeholder="+91 99223 34455"
+                className="auth-input auth-input-coach"
+                required
               />
             </div>
           </div>
 
-          {/* Row 3: Experience & Certification */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '14px' }}>
+          {/* Row 3: Certification & License Number */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '14px' }}>
             <div>
-              <label className="field-label">Coaching Experience</label>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Award size={13} color="#2563EB" />
+                Accreditation / Certification Name *
+              </label>
+              <input
+                type="text"
+                value={certification}
+                onChange={(e) => setCertification(e.target.value)}
+                placeholder="e.g. AFI Level 2 / NIS Diploma / FIBA Level 1"
+                className="auth-input auth-input-coach"
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label">License / Credential ID *</label>
+              <input
+                type="text"
+                value={licenseNo}
+                onChange={(e) => setLicenseNo(e.target.value)}
+                placeholder="e.g. WA-IND-2024-891"
+                className="auth-input auth-input-coach"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Row 4: Affiliated College/Academy, Specialization & Experience */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 0.8fr', gap: '12px' }}>
+            <div>
+              <label className="field-label">Associated College / Academy</label>
+              <input
+                type="text"
+                value={currentAcademy}
+                onChange={(e) => setCurrentAcademy(e.target.value)}
+                placeholder="e.g. Delhi University Sports Council"
+                className="auth-input auth-input-coach"
+              />
+            </div>
+            <div>
+              <label className="field-label">Coaching Specialization</label>
+              <input
+                type="text"
+                value={specialization}
+                onChange={(e) => setSpecialization(e.target.value)}
+                placeholder="e.g. Sprint Mechanics / Defensive Tactics"
+                className="auth-input auth-input-coach"
+              />
+            </div>
+            <div>
+              <label className="field-label">Experience</label>
               <select
                 value={yearsOfExperience}
                 onChange={(e) => setYearsOfExperience(e.target.value)}
@@ -258,72 +376,69 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
                 <option value="1-3 Years">1-3 Years</option>
                 <option value="4-7 Years">4-7 Years</option>
                 <option value="8-12 Years">8-12 Years</option>
-                <option value="12+ Years Veteran">12+ Years Veteran</option>
+                <option value="12+ Years">12+ Years (Master Coach)</option>
               </select>
             </div>
-            <div>
-              <label className="field-label">Certifications & Badges</label>
-              <input
-                type="text"
-                value={certification}
-                onChange={(e) => setCertification(e.target.value)}
-                placeholder="e.g. NIS / IAAF Level 2 / AFC License"
-                className="auth-input auth-input-coach"
-              />
-            </div>
           </div>
 
-          {/* Row 4: Academy & City */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '14px' }}>
-            <div>
-              <label className="field-label">Current Academy / Club</label>
-              <input
-                type="text"
-                value={currentAcademy}
-                onChange={(e) => setCurrentAcademy(e.target.value)}
-                placeholder="Your sports academy or club name"
-                className="auth-input auth-input-coach"
-              />
-            </div>
-            <div>
-              <label className="field-label">City Base</label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="e.g. Delhi NCR / Austin"
-                className="auth-input auth-input-coach"
-              />
-            </div>
-          </div>
-
-          {/* LinkedIn Profile */}
-          <div>
-            <label className="field-label">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#7C3AED">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                </svg>
-                LinkedIn Profile URL (Optional)
+          {/* Row 5: Mandatory Coach Certificate Upload */}
+          <div
+            style={{
+              border: '1.5px dashed #CBD5E1',
+              borderRadius: '12px',
+              padding: '16px',
+              backgroundColor: '#F8FAFC',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Award size={14} color="#2563EB" />
+                Coach Certificate Document / Federation Scan *
               </span>
-            </label>
-            <input
-              type="url"
-              value={linkedinUrl}
-              onChange={(e) => setLinkedinUrl(e.target.value)}
-              placeholder="https://linkedin.com/in/your-profile"
-              className="auth-input auth-input-coach"
-            />
+              <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <CheckCircle size={12} /> Ready
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', padding: '8px 10px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+              <FileText size={16} color="#64748B" />
+              <span style={{ fontSize: '12px', color: '#1E293B', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {certificateDocName}
+              </span>
+              <label
+                style={{
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#2563EB',
+                  background: '#EFF6FF',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid #BFDBFE',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <Upload size={11} /> Change Certificate
+                <input type="file" accept="image/*,.pdf" onChange={handleCertUpload} style={{ display: 'none' }} />
+              </label>
+            </div>
+            <p style={{ margin: 0, fontSize: '11px', color: '#64748B' }}>
+              Upload your official federation diploma, certificate scan, or coaching credentials badge.
+            </p>
           </div>
 
-          {/* Bio / Coaching Philosophy */}
+          {/* Specialization & Bio */}
           <div>
-            <label className="field-label">Coaching Philosophy & Background</label>
+            <label className="field-label">Coaching Specialization & Track Record</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              rows={3}
-              placeholder="Describe your coaching philosophy, athlete mentorship track record, and specialties..."
+              rows={2}
+              placeholder="Notable athletes trained, tournament titles won, or coaching methodologies..."
               className="auth-input auth-input-coach"
               style={{ resize: 'vertical' }}
             />
@@ -332,6 +447,7 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
           {/* Submit */}
           <button
             type="submit"
+            disabled={isSubmitting}
             className="btn-primary btn-coach"
             style={{
               marginTop: '10px',
@@ -339,9 +455,11 @@ export const CoachProfileForm: React.FC<CoachProfileFormProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              opacity: isSubmitting ? 0.7 : 1,
             }}
           >
-            <span>Complete Profile & Open Coach Platform (Port 3002)</span>
+            <span>Submit Coach Credentials to Platform Admin</span>
             <ArrowRight size={18} />
           </button>
         </form>

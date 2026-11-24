@@ -418,7 +418,7 @@ export const Header: React.FC<HeaderProps> = ({
                       } catch {}
                       showToast('Signed out of SportSphere active athlete session.');
                       setTimeout(() => {
-                        window.location.href = 'http://localhost:3003';
+                        window.location.href = 'http://localhost:3004';
                       }, 350);
                     }}
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 text-left cursor-pointer"

@@ -135,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sessionStorage.clear();
               } catch {}
               setTimeout(() => {
-                window.location.href = 'http://localhost:3003';
+                window.location.href = 'http://localhost:3004';
               }, 300);
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition-colors cursor-pointer active:scale-95 shadow-2xs ml-1"

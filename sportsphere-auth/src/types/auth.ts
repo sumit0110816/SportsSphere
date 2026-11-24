@@ -2,7 +2,7 @@ export type UserRole = 'student' | 'organizer' | 'coach';
 
 export type AuthMode = 'signup' | 'login';
 
-export type AuthStep = 'role' | 'credentials' | 'profile' | 'success';
+export type AuthStep = 'role' | 'credentials' | 'profile' | 'success' | 'verification_pending';
 
 export interface BaseCredentials {
   email: string;
@@ -26,29 +26,40 @@ export interface StudentProfileData {
 
 export interface OrganizerProfileData {
   fullName: string;
-  designation: string;
-  organizationName: string;
-  organizationType: string;
-  city: string;
-  state: string;
-  phone: string;
-  website: string;
-  bio: string;
-  avatar: string;
+  collegeEmail: string;
+  contactNumber: string;
+  collegeId: string;
+  collegeName: string;
+  department?: string;
+  collegeIdDocUrl?: string;
+  nocLetterUrl?: string;
+  designation?: string;
+  organizationName?: string;
+  organizationType?: string;
+  city?: string;
+  state?: string;
+  phone?: string;
+  website?: string;
+  bio?: string;
+  avatar?: string;
 }
 
 export interface CoachProfileData {
   fullName: string;
-  title: string;
+  email: string;
+  contactNumber: string;
   primarySport: string;
-  specialization: string;
-  yearsOfExperience: string;
-  certification: string;
-  currentAcademy: string;
-  city: string;
-  linkedinUrl: string;
-  bio: string;
-  avatar: string;
+  coachCertificateUrl?: string;
+  licenseNo?: string;
+  yearsOfExperience?: string;
+  certification?: string;
+  currentAcademy?: string;
+  title?: string;
+  specialization?: string;
+  city?: string;
+  linkedinUrl?: string;
+  bio?: string;
+  avatar?: string;
 }
 
 export interface UserSession {
@@ -56,6 +67,7 @@ export interface UserSession {
   email: string;
   name: string;
   profile: StudentProfileData | OrganizerProfileData | CoachProfileData | null;
+  verificationStatus?: 'pending' | 'approved' | 'rejected';
 }
 
 export const ROLE_CONFIG = {

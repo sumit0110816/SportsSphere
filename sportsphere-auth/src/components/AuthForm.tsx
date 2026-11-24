@@ -38,15 +38,25 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   const config = ROLE_CONFIG[role];
   const displayError = externalError || localError;
 
-  const handleFillDemo = (demoRole: UserRole) => {
-    onSelectRole(demoRole);
-    if (demoRole === 'student') {
+  const handleFillDemo = (demoType: 'student' | 'organizer_approved' | 'organizer_pending' | 'coach_approved' | 'coach_pending') => {
+    if (demoType === 'student') {
+      onSelectRole('student');
       setEmail('alex.striker@sportsphere.edu');
       setPassword('Athlete2026!');
-    } else if (demoRole === 'organizer') {
+    } else if (demoType === 'organizer_approved') {
+      onSelectRole('organizer');
+      setEmail('ananya.iyer@bits-pilani.ac.in');
+      setPassword('Organizer2026!');
+    } else if (demoType === 'organizer_pending') {
+      onSelectRole('organizer');
       setEmail('director@nationalleagues.org');
       setPassword('Organizer2026!');
-    } else {
+    } else if (demoType === 'coach_approved') {
+      onSelectRole('coach');
+      setEmail('vikram.singh@delhiathletics.org');
+      setPassword('Coach2026!');
+    } else if (demoType === 'coach_pending') {
+      onSelectRole('coach');
       setEmail('coach.rodriguez@eliteacademy.com');
       setPassword('Coach2026!');
     }
@@ -224,6 +234,41 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               : `Enter your credentials to access the ${config.title} workspace.`}
           </p>
         </div>
+
+        {/* Verification Policy Notice */}
+        {role === 'organizer' && (
+          <div
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              fontSize: '12px',
+              color: '#92400E',
+              lineHeight: 1.45,
+              marginBottom: '16px',
+            }}
+          >
+            <strong>🏛️ Organizer Governance:</strong> Access requires verified College Email, Contact Number, College ID Card & Dean NOC Letter approved by Platform Admin.
+          </div>
+        )}
+
+        {role === 'coach' && (
+          <div
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: '#EEF2FF',
+              border: '1px solid #C7D2FE',
+              fontSize: '12px',
+              color: '#3730A3',
+              lineHeight: 1.45,
+              marginBottom: '16px',
+            }}
+          >
+            <strong>🏅 Coach Accreditation:</strong> Access requires verified Professional Email, Contact Number, Coach Certificate (AFI/FIBA/NIS) approved by Platform Admin.
+          </div>
+        )}
 
         {/* Google SSO Button */}
         <button
@@ -486,61 +531,98 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
         {/* Quick Demo Credentials shortcut */}
         <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E2E8F0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <div style={{ marginBottom: '8px' }}>
             <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
               <Zap size={12} color="#F59E0B" />
-              Demo Credentials:
+              Quick Demo Accounts (Test Verification Flow):
             </span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button
-                type="button"
-                onClick={() => handleFillDemo('student')}
-                style={{
-                  fontSize: '11px',
-                  color: '#0284C7',
-                  background: '#F0F9FF',
-                  border: '1px solid #BAE6FD',
-                  borderRadius: '6px',
-                  padding: '3px 8px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
-                Athlete
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFillDemo('organizer')}
-                style={{
-                  fontSize: '11px',
-                  color: '#D97706',
-                  background: '#FFFBEB',
-                  border: '1px solid #FDE68A',
-                  borderRadius: '6px',
-                  padding: '3px 8px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
-                Organizer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFillDemo('coach')}
-                style={{
-                  fontSize: '11px',
-                  color: '#4F46E5',
-                  background: '#EEF2FF',
-                  border: '1px solid #C7D2FE',
-                  borderRadius: '6px',
-                  padding: '3px 8px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
-              >
-                Coach
-              </button>
-            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={() => handleFillDemo('student')}
+              title="Immediate access to Student Dashboard :3000"
+              style={{
+                fontSize: '11px',
+                color: '#0284C7',
+                background: '#F0F9FF',
+                border: '1px solid #BAE6FD',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              Athlete (Instant :3000)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFillDemo('organizer_approved')}
+              title="Verified Organizer - immediate access to :3001"
+              style={{
+                fontSize: '11px',
+                color: '#047857',
+                background: '#ECFDF5',
+                border: '1px solid #A7F3D0',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              Organizer (Approved :3001)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFillDemo('organizer_pending')}
+              title="Pending Organizer - triggers Admin Review gate"
+              style={{
+                fontSize: '11px',
+                color: '#B45309',
+                background: '#FFFBEB',
+                border: '1px solid #FDE68A',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              Organizer (Pending Review)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFillDemo('coach_approved')}
+              title="Verified Coach - immediate access to :3002"
+              style={{
+                fontSize: '11px',
+                color: '#4338CA',
+                background: '#EEF2FF',
+                border: '1px solid #C7D2FE',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              Coach (Approved :3002)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFillDemo('coach_pending')}
+              title="Pending Coach - triggers Admin Review gate"
+              style={{
+                fontSize: '11px',
+                color: '#B45309',
+                background: '#FFFBEB',
+                border: '1px solid #FDE68A',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              Coach (Pending Review)
+            </button>
           </div>
         </div>
 

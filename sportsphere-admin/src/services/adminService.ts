@@ -559,8 +559,56 @@ export const logAdminAudit = async (
   }
 };
 
+// Helper to synchronize with shared cross-port database
+export const syncWithSharedDb = async (): Promise<void> => {
+  try {
+    const res = await fetch('/api/sync/all');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.coachApplications)) {
+        for (const app of data.coachApplications) {
+          const existing = cachedCoachApps.find((c) => c.id === app.id);
+          if (existing) {
+            existing.status = app.status;
+            existing.rejectionReason = app.rejectionReason;
+          } else {
+            cachedCoachApps.unshift(app);
+          }
+        }
+      }
+      if (Array.isArray(data.organizerApplications)) {
+        for (const app of data.organizerApplications) {
+          const existing = cachedOrgApps.find((o) => o.id === app.id);
+          if (existing) {
+            existing.status = app.status;
+            existing.rejectionReason = app.rejectionReason;
+          } else {
+            cachedOrgApps.unshift(app);
+          }
+        }
+      }
+      if (Array.isArray(data.users)) {
+        for (const user of data.users) {
+          const existing = cachedUsers.find(
+            (u) => u.uid === user.uid || (u.email && u.email.toLowerCase() === user.email?.toLowerCase())
+          );
+          if (existing) {
+            existing.roles = user.roles || existing.roles;
+            existing.status = user.status || existing.status;
+          } else {
+            cachedUsers.unshift(user);
+          }
+        }
+      }
+    }
+  } catch {
+    // Offline / fallback to in-memory cache
+  }
+};
+
 // 1. STATS
 export const getPlatformStats = async (): Promise<PlatformStats> => {
+  await syncWithSharedDb();
   const totalUsers = cachedUsers.length;
   const totalAthletes = cachedUsers.filter((u) => u.roles.includes('student')).length;
   const totalCoaches = cachedUsers.filter((u) => u.roles.includes('coach')).length;
@@ -702,6 +750,7 @@ export const updateUserRoles = async (
 
 // 3. COACH VERIFICATION
 export const getCoachApplications = async (): Promise<CoachApplication[]> => {
+  await syncWithSharedDb();
   return cachedCoachApps;
 };
 
@@ -712,10 +761,19 @@ export const approveCoachApplication = async (id: string, notes?: string): Promi
     app.reviewedAt = new Date().toISOString();
 
     // Automatically ensure the target user has 'coach' role
-    const user = cachedUsers.find((u) => u.uid === app.uid);
+    const user = cachedUsers.find((u) => u.uid === app.uid || (u.email && u.email.toLowerCase() === app.email?.toLowerCase()));
     if (user && !user.roles.includes('coach')) {
       user.roles.push('coach');
+      user.status = 'active';
     }
+
+    try {
+      await fetch('/api/sync/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, type: 'coach', notes }),
+      });
+    } catch {}
 
     await logAdminAudit(
       'COACH_APPROVAL',
@@ -735,6 +793,14 @@ export const rejectCoachApplication = async (id: string, reason: string): Promis
     app.reviewedAt = new Date().toISOString();
     app.rejectionReason = reason;
 
+    try {
+      await fetch('/api/sync/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, type: 'coach', reason }),
+      });
+    } catch {}
+
     await logAdminAudit(
       'COACH_REJECTION',
       'Coach',
@@ -748,6 +814,7 @@ export const rejectCoachApplication = async (id: string, reason: string): Promis
 
 // 4. ORGANIZER VERIFICATION
 export const getOrganizerApplications = async (): Promise<OrganizerApplication[]> => {
+  await syncWithSharedDb();
   return cachedOrgApps;
 };
 
@@ -758,10 +825,19 @@ export const approveOrganizerApplication = async (id: string, notes?: string): P
     app.reviewedAt = new Date().toISOString();
 
     // Ensure user has organizer role
-    const user = cachedUsers.find((u) => u.uid === app.uid);
+    const user = cachedUsers.find((u) => u.uid === app.uid || (u.email && u.email.toLowerCase() === app.email?.toLowerCase()));
     if (user && !user.roles.includes('organizer')) {
       user.roles.push('organizer');
+      user.status = 'active';
     }
+
+    try {
+      await fetch('/api/sync/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, type: 'organizer', notes }),
+      });
+    } catch {}
 
     await logAdminAudit(
       'ORGANIZER_APPROVAL',
@@ -780,6 +856,14 @@ export const rejectOrganizerApplication = async (id: string, reason: string): Pr
     app.status = 'rejected';
     app.reviewedAt = new Date().toISOString();
     app.rejectionReason = reason;
+
+    try {
+      await fetch('/api/sync/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, type: 'organizer', reason }),
+      });
+    } catch {}
 
     await logAdminAudit(
       'ORGANIZER_REJECTION',

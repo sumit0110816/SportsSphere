@@ -7,6 +7,7 @@ import { StudentProfileForm } from './components/ProfileSetup/StudentProfileForm
 import { OrganizerProfileForm } from './components/ProfileSetup/OrganizerProfileForm';
 import { CoachProfileForm } from './components/ProfileSetup/CoachProfileForm';
 import { SuccessScreen } from './components/SuccessScreen';
+import { VerificationPendingScreen } from './components/VerificationPendingScreen';
 import {
   type UserRole,
   type AuthMode,
@@ -41,6 +42,8 @@ export const App: React.FC = () => {
   const [currentUid, setCurrentUid] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string>('');
+  const [pendingVerificationStatus, setPendingVerificationStatus] = useState<'pending' | 'rejected' | 'approved'>('pending');
+  const [pendingRejectionReason, setPendingRejectionReason] = useState<string>('');
 
   // Subscribe to Firebase auth state if available
   useEffect(() => {
@@ -91,7 +94,7 @@ export const App: React.FC = () => {
     setStep('profile');
   };
 
-  // Login -> Authenticates against Firebase Auth & checks Firestore profile
+  // Login -> Authenticates against Firebase Auth & checks Admin Verification Gating
   const handleLoginSubmit = async (role: UserRole, creds: BaseCredentials) => {
     setSelectedRole(role);
     setIsLoading(true);
@@ -101,7 +104,7 @@ export const App: React.FC = () => {
     setIsLoading(false);
 
     if (!result.success) {
-      setAuthError(result.error || 'Failed to log in with Firebase credentials');
+      setAuthError(result.error || 'Failed to log in with credentials');
       return;
     }
 
@@ -111,7 +114,7 @@ export const App: React.FC = () => {
       setCurrentUid(result.user.uid);
     }
 
-    // Name derived dynamically from login user's account / profile
+    // Derived user name
     const derivedName =
       (result.profile as { fullName?: string })?.fullName ||
       result.user?.displayName ||
@@ -124,8 +127,52 @@ export const App: React.FC = () => {
       profile: result.profile || null,
     };
 
+    // 1. Student / Athlete: immediate access to Port 3000
+    if (assignedRole === 'student') {
+      newSession.verificationStatus = 'approved';
+      setSession(newSession);
+      setStep('success');
+      return;
+    }
+
+    // 2. Organizer & Coach: Verification check against Admin Registry
+    try {
+      const statusRes = await fetch(
+        `/api/sync/check-status?email=${encodeURIComponent(newSession.email)}&role=${assignedRole}`
+      );
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        if (statusData.status === 'approved') {
+          newSession.verificationStatus = 'approved';
+          setSession(newSession);
+          setStep('success');
+          return;
+        } else if (statusData.status === 'rejected') {
+          newSession.verificationStatus = 'rejected';
+          setPendingVerificationStatus('rejected');
+          setPendingRejectionReason(statusData.rejectionReason || 'Application rejected by platform administrator.');
+          setSession(newSession);
+          setStep('verification_pending');
+          return;
+        } else {
+          // Status is 'pending'
+          newSession.verificationStatus = 'pending';
+          setPendingVerificationStatus('pending');
+          setPendingRejectionReason('');
+          setSession(newSession);
+          setStep('verification_pending');
+          return;
+        }
+      }
+    } catch {
+      // Local sync fallback
+    }
+
+    // Fallback: Gate as pending verification
+    newSession.verificationStatus = 'pending';
+    setPendingVerificationStatus('pending');
     setSession(newSession);
-    setStep('success');
+    setStep('verification_pending');
   };
 
   // Google Sign In
@@ -160,11 +207,43 @@ export const App: React.FC = () => {
       profile: result.profile || null,
     };
 
+    if (assignedRole === 'student') {
+      newSession.verificationStatus = 'approved';
+      setSession(newSession);
+      setStep('success');
+      return;
+    }
+
+    // Check status for Organizer and Coach
+    try {
+      const statusRes = await fetch(
+        `/api/sync/check-status?email=${encodeURIComponent(newSession.email)}&role=${assignedRole}`
+      );
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        if (statusData.status === 'approved') {
+          newSession.verificationStatus = 'approved';
+          setSession(newSession);
+          setStep('success');
+          return;
+        } else if (statusData.status === 'rejected') {
+          newSession.verificationStatus = 'rejected';
+          setPendingVerificationStatus('rejected');
+          setPendingRejectionReason(statusData.rejectionReason || 'Application rejected by platform administrator.');
+          setSession(newSession);
+          setStep('verification_pending');
+          return;
+        }
+      }
+    } catch {}
+
+    newSession.verificationStatus = 'pending';
+    setPendingVerificationStatus('pending');
     setSession(newSession);
-    setStep('success');
+    setStep('verification_pending');
   };
 
-  // Step 3 Profile Submissions -> Writes to Cloud Firestore
+  // Step 3 Profile Submissions -> Writes to Cloud Firestore & Sync
   const handleStudentProfileSubmit = async (profile: StudentProfileData) => {
     if (!selectedRole) return;
     setIsLoading(true);
@@ -178,6 +257,7 @@ export const App: React.FC = () => {
       email: credentials?.email || 'athlete@sportsphere.org',
       name: profile.fullName,
       profile,
+      verificationStatus: 'approved',
     };
     setSession(newSession);
     setStep('success');
@@ -193,12 +273,14 @@ export const App: React.FC = () => {
 
     const newSession: UserSession = {
       role: 'organizer',
-      email: credentials?.email || 'organizer@sportsphere.org',
+      email: credentials?.email || profile.collegeEmail || 'organizer@sportsphere.org',
       name: profile.fullName,
       profile,
+      verificationStatus: 'pending',
     };
     setSession(newSession);
-    setStep('success');
+    setPendingVerificationStatus('pending');
+    setStep('verification_pending');
   };
 
   const handleCoachProfileSubmit = async (profile: CoachProfileData) => {
@@ -211,12 +293,14 @@ export const App: React.FC = () => {
 
     const newSession: UserSession = {
       role: 'coach',
-      email: credentials?.email || 'coach@sportsphere.org',
+      email: credentials?.email || profile.email || 'coach@sportsphere.org',
       name: profile.fullName,
       profile,
+      verificationStatus: 'pending',
     };
     setSession(newSession);
-    setStep('success');
+    setPendingVerificationStatus('pending');
+    setStep('verification_pending');
   };
 
   const handleReset = () => {
@@ -225,8 +309,10 @@ export const App: React.FC = () => {
     setSelectedRole(null);
     setCurrentUid('');
     setAuthError('');
-    setMode('signup');
-    setStep('role');
+    setPendingVerificationStatus('pending');
+    setPendingRejectionReason('');
+    setMode('login');
+    setStep('credentials');
   };
 
   const initialDerivedName = credentials?.email
@@ -284,29 +370,32 @@ export const App: React.FC = () => {
           )}
 
           {/* STEP 2: Credentials (or Login mode) */}
-          {(step === 'credentials' || mode === 'login') && step !== 'success' && (
-            <motion.div
-              key="auth-form-step"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.25 }}
-              style={{ width: '100%' }}
-            >
-              <AuthForm
-                mode={mode}
-                role={selectedRole || 'student'}
-                onSelectRole={(r) => setSelectedRole(r)}
-                onSwitchMode={handleToggleMode}
-                onBackToRoles={() => setStep('role')}
-                onSubmitSignupCredentials={handleSignupCredentials}
-                onSubmitLogin={handleLoginSubmit}
-                onGoogleSignIn={handleGoogleSignIn}
-                isLoading={isLoading}
-                externalError={authError}
-              />
-            </motion.div>
-          )}
+          {(step === 'credentials' || mode === 'login') &&
+            step !== 'success' &&
+            step !== 'verification_pending' &&
+            step !== 'profile' && (
+              <motion.div
+                key="auth-form-step"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
+                style={{ width: '100%' }}
+              >
+                <AuthForm
+                  mode={mode}
+                  role={selectedRole || 'student'}
+                  onSelectRole={(r) => setSelectedRole(r)}
+                  onSwitchMode={handleToggleMode}
+                  onBackToRoles={() => setStep('role')}
+                  onSubmitSignupCredentials={handleSignupCredentials}
+                  onSubmitLogin={handleLoginSubmit}
+                  onGoogleSignIn={handleGoogleSignIn}
+                  isLoading={isLoading}
+                  externalError={authError}
+                />
+              </motion.div>
+            )}
 
           {/* STEP 3: Profile Setup per role */}
           {mode === 'signup' && step === 'profile' && selectedRole === 'student' && (
@@ -363,6 +452,29 @@ export const App: React.FC = () => {
             </motion.div>
           )}
 
+          {/* STEP: Admin Verification Gate (Pending / Rejected) */}
+          {step === 'verification_pending' && session && (
+            <motion.div
+              key="verification-pending-step"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.25 }}
+              style={{ width: '100%' }}
+            >
+              <VerificationPendingScreen
+                session={session}
+                status={pendingVerificationStatus}
+                rejectionReason={pendingRejectionReason}
+                onApproved={() => {
+                  setSession({ ...session, verificationStatus: 'approved' });
+                  setStep('success');
+                }}
+                onBackToLogin={handleReset}
+              />
+            </motion.div>
+          )}
+
           {/* STEP 4: Success & Dashboard Redirect */}
           {step === 'success' && session && (
             <motion.div
@@ -393,13 +505,13 @@ export const App: React.FC = () => {
         }}
       >
         <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <span>© 2026 SportSync Universal Athletics Network • AIU Sanctioned • 256-Bit SSL Encrypted</span>
-          <div style={{ display: 'flex', gap: '16px', fontWeight: 500 }}>
-            <span>Privacy Policy</span>
-            <span>•</span>
-            <span>Terms of Service</span>
-            <span>•</span>
-            <span>Security Overview</span>
+          <span>© 2026 SportSphere Multi-Role Sports Technology Ecosystem</span>
+          <div style={{ display: 'flex', gap: '14px', fontWeight: 600 }}>
+            <span style={{ color: '#0284C7' }}>Athlete: :3000</span>
+            <span style={{ color: '#D97706' }}>Organizer: :3001</span>
+            <span style={{ color: '#4F46E5' }}>Coach: :3002</span>
+            <span style={{ color: '#DC2626' }}>Admin: :3003</span>
+            <span style={{ color: '#0F172A' }}>Auth: :3004</span>
           </div>
         </div>
       </footer>

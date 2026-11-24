@@ -209,7 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 } catch {}
                 if (onCloseMobile) onCloseMobile();
                 setTimeout(() => {
-                  window.location.href = 'http://localhost:3003';
+                  window.location.href = 'http://localhost:3004';
                 }, 300);
               }}
               className="btn-interactive mt-2 w-full py-1.5 px-3 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 border border-rose-200 text-rose-700 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer group"
@@ -234,7 +234,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   localStorage.removeItem('sportsphere_auth_user');
                   sessionStorage.clear();
                 } catch {}
-                setTimeout(() => { window.location.href = 'http://localhost:3003'; }, 300);
+                setTimeout(() => { window.location.href = 'http://localhost:3004'; }, 300);
               }}
               title="Log Out"
               className="w-full flex items-center justify-center p-2 rounded-lg text-rose-400 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"

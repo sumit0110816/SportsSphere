@@ -1,0 +1,268 @@
+{
+  "users": [
+    {
+      "uid": "usr_001",
+      "email": "rohit.sharma@iitd.ac.in",
+      "fullName": "Rohit Sharma",
+      "college": "IIT Delhi",
+      "roles": [
+        "student",
+        "coach"
+      ],
+      "status": "approved",
+      "phone": "+91 98765 43210",
+      "createdAt": "2026-09-12T10:30:00Z"
+    },
+    {
+      "uid": "usr_002",
+      "email": "ananya.iyer@bits-pilani.ac.in",
+      "fullName": "Ananya Iyer",
+      "college": "BITS Pilani",
+      "roles": [
+        "student",
+        "organizer"
+      ],
+      "status": "approved",
+      "phone": "+91 98111 22334",
+      "createdAt": "2026-08-20T14:45:00Z"
+    },
+    {
+      "uid": "usr_003",
+      "email": "vikram.singh@delhiathletics.org",
+      "fullName": "Vikram Singh",
+      "college": "Delhi University",
+      "roles": [
+        "coach"
+      ],
+      "status": "approved",
+      "phone": "+91 99223 34455",
+      "createdAt": "2026-07-15T09:00:00Z"
+    },
+    {
+      "uid": "usr_005",
+      "email": "karan.malhotra@spit.ac.in",
+      "fullName": "Karan Malhotra",
+      "college": "SPIT Mumbai",
+      "roles": [
+        "student",
+        "coach",
+        "organizer"
+      ],
+      "status": "approved",
+      "phone": "+91 98333 44556",
+      "createdAt": "2026-06-11T16:15:00Z"
+    },
+    {
+      "uid": "demo_coach_1",
+      "email": "coach.rodriguez@eliteacademy.com",
+      "fullName": "Coach Rodriguez",
+      "college": "Elite Athletics Academy",
+      "roles": [
+        "coach"
+      ],
+      "status": "pending",
+      "phone": "+91 98888 77711",
+      "createdAt": "2026-11-24T12:00:00Z"
+    },
+    {
+      "uid": "demo_org_1",
+      "email": "director@nationalleagues.org",
+      "fullName": "Director Sharma",
+      "college": "Delhi Technological University",
+      "roles": [
+        "organizer"
+      ],
+      "status": "pending",
+      "phone": "+91 97777 66622",
+      "createdAt": "2026-11-24T12:30:00Z"
+    },
+    {
+      "uid": "usr_1795530220375",
+      "email": "test.organizer@iitb.ac.in",
+      "fullName": "Test Organizer Dev",
+      "college": "IIT Bombay",
+      "roles": [
+        "organizer"
+      ],
+      "status": "approved",
+      "phone": "+91 91234 56789",
+      "createdAt": "2026-11-24T14:23:40.376Z"
+    },
+    {
+      "uid": "usr_1795530233396",
+      "email": "test.coach@invalidfed.org",
+      "fullName": "Test Coach Dev",
+      "college": "Private Club",
+      "roles": [
+        "coach"
+      ],
+      "status": "rejected",
+      "phone": "+91 99887 76655",
+      "createdAt": "2026-11-24T14:23:53.401Z",
+      "verificationNotes": "Certificate is not accredited by Badminton Association of India (BAI) or SAI."
+    }
+  ],
+  "coachApplications": [
+    {
+      "id": "capp_1795530233396",
+      "uid": "usr_1795530233396",
+      "fullName": "Test Coach Dev",
+      "email": "test.coach@invalidfed.org",
+      "phone": "+91 99887 76655",
+      "sport": "Badminton",
+      "collegeOrOrg": "Private Club",
+      "certification": "Unaccredited Online Certificate",
+      "licenseNo": "UNVERIFIED-001",
+      "documents": [
+        {
+          "name": "Coaching_License_Certificate.pdf",
+          "url": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+          "type": "pdf",
+          "size": "2.1 MB"
+        }
+      ],
+      "status": "rejected",
+      "submittedAt": "2026-11-24T14:23:53.396Z",
+      "rejectionReason": "Certificate is not accredited by Badminton Association of India (BAI) or SAI.",
+      "reviewedAt": "2026-11-24T14:23:53.423Z"
+    },
+    {
+      "id": "capp_101",
+      "uid": "usr_101",
+      "fullName": "Arjun Rathore",
+      "email": "arjun.rathore@sportsauthority.in",
+      "phone": "+91 98765 11223",
+      "sport": "Track & Field / Athletics",
+      "collegeOrOrg": "National Institute of Sports (NIS) Patiala",
+      "experienceYears": "8 years",
+      "certification": "AFI Level-2 & World Athletics Certified Coach",
+      "licenseNo": "WA-IND-2022-891",
+      "documents": [
+        {
+          "name": "NIS_Patiala_Diploma.pdf",
+          "url": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+          "type": "pdf",
+          "size": "2.4 MB"
+        },
+        {
+          "name": "AFI_Level2_Credential.pdf",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "type": "pdf",
+          "size": "1.8 MB"
+        }
+      ],
+      "status": "pending",
+      "submittedAt": "2026-11-22T14:30:00Z"
+    },
+    {
+      "id": "capp_demo_1",
+      "uid": "demo_coach_1",
+      "fullName": "Coach Rodriguez",
+      "email": "coach.rodriguez@eliteacademy.com",
+      "phone": "+91 98888 77711",
+      "sport": "Basketball & Athletics",
+      "collegeOrOrg": "Elite Athletics Academy",
+      "experienceYears": "5 years",
+      "certification": "FIBA National Coach Level 1 & State Athletic License",
+      "licenseNo": "IND-FIBA-2024-902",
+      "documents": [
+        {
+          "name": "Coach_License_Certificate.pdf",
+          "url": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+          "type": "pdf",
+          "size": "2.1 MB"
+        }
+      ],
+      "status": "pending",
+      "submittedAt": "2026-11-24T12:00:00Z"
+    }
+  ],
+  "organizerApplications": [
+    {
+      "id": "orgapp_1795530220375",
+      "uid": "usr_1795530220375",
+      "fullName": "Test Organizer Dev",
+      "email": "test.organizer@iitb.ac.in",
+      "phone": "+91 91234 56789",
+      "collegeName": "IIT Bombay",
+      "studentId": "24B030012",
+      "collegeEmail": "test.organizer@iitb.ac.in",
+      "department": "Aavhan Sports Board",
+      "nocLetterUrl": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+      "documents": [
+        {
+          "name": "Student_ID_Scan.jpg",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "type": "image",
+          "size": "1.2 MB"
+        },
+        {
+          "name": "College_Dean_NOC.pdf",
+          "url": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+          "type": "pdf",
+          "size": "2.4 MB"
+        }
+      ],
+      "status": "approved",
+      "submittedAt": "2026-11-24T14:23:40.375Z",
+      "reviewedAt": "2026-11-24T14:23:40.444Z",
+      "verificationNotes": "Dean NOC verified with IIT Bombay Dean of Student Affairs"
+    },
+    {
+      "id": "orgapp_201",
+      "uid": "usr_201",
+      "fullName": "Kavita Sundaram",
+      "email": "kavita.s@iitm.ac.in",
+      "phone": "+91 94440 12345",
+      "collegeName": "IIT Madras",
+      "studentId": "ED22B045",
+      "collegeEmail": "kavita.sundaram@smail.iitm.ac.in",
+      "department": "Sports Organizing Committee",
+      "nocLetterUrl": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+      "documents": [
+        {
+          "name": "IITM_Dean_NOC_Authorization.pdf",
+          "url": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+          "type": "pdf",
+          "size": "2.1 MB"
+        },
+        {
+          "name": "Student_ID_Scan.jpg",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "type": "image",
+          "size": "950 KB"
+        }
+      ],
+      "status": "pending",
+      "submittedAt": "2026-11-23T11:00:00Z"
+    },
+    {
+      "id": "orgapp_demo_1",
+      "uid": "demo_org_1",
+      "fullName": "Director Sharma",
+      "email": "director@nationalleagues.org",
+      "phone": "+91 97777 66622",
+      "collegeName": "Delhi Technological University",
+      "studentId": "2022DTU-SP-441",
+      "collegeEmail": "director@dtu.ac.in",
+      "department": "DTU Sports Council & Inter-College Meet",
+      "nocLetterUrl": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+      "documents": [
+        {
+          "name": "DTU_Dean_Signed_NOC.pdf",
+          "url": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
+          "type": "pdf",
+          "size": "1.8 MB"
+        },
+        {
+          "name": "College_ID_Card.jpg",
+          "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+          "type": "image",
+          "size": "1.1 MB"
+        }
+      ],
+      "status": "pending",
+      "submittedAt": "2026-11-24T12:30:00Z"
+    }
+  ]
+}

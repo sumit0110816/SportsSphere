@@ -116,8 +116,10 @@ export const Header: React.FC<HeaderProps> = ({ mode, onToggleMode, onOpenAdmin 
                 border: 'none',
                 cursor: 'pointer',
               }}
+              title="Open Admin Governance Console on Port 3003"
             >
               <span>Admin Console</span>
+              <span style={{ fontSize: '10px', background: '#334155', padding: '1px 5px', borderRadius: '4px', color: '#93C5FD' }}>:3003</span>
             </button>
           )}
         </div>

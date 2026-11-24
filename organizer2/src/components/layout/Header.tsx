@@ -372,7 +372,7 @@ export const Header: React.FC<HeaderProps> = ({
                 } catch {}
                 showToast('Signed out of SportSphere Organizer Portal');
                 setTimeout(() => {
-                  window.location.href = 'http://localhost:3003';
+                  window.location.href = 'http://localhost:3004';
                 }, 350);
               }}
               title="Log out from SportSphere"

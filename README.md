@@ -6,11 +6,12 @@ A Unified Multi-Role Sports Ecosystem connecting Student Athletes, Sports Organi
 
 ## 🏛️ Architecture & Platform Overview
 
-SportSphere consists of 4 integrated web applications running seamlessly together:
+SportSphere consists of 5 integrated web applications running seamlessly together:
 
 | Application | Port | Role / Purpose | Tech Stack |
 |---|---|---|---|
-| **sportsphere-auth** | `:3003` | Central Authentication & Single Sign-On (SSO) Portal with Firebase Auth & Cloud Firestore | React, Vite, TypeScript, Firebase |
+| **sportsphere-auth** | `:3004` | Central Login, Registration & Multi-Role SSO Gateway with Admin Verification Gating | React, Vite, TypeScript, Firebase |
+| **sportsphere-admin** | `:3003` | Platform Admin Governance Console (User Management, Coach & Organizer Verification, Audit Logs) | React, Vite, TypeScript, Firebase |
 | **miniproject-student-dashboard** | `:3000` | Athlete & Student Dashboard (Leaderboards, Highlights, Event Registrations) | HTML5, TailwindCSS, JavaScript, Vite |
 | **organizer2** | `:3001` | Sports Tournament & Event Organizer Platform (Fixtures, Approvals, Results) | React, Vite, TypeScript, TailwindCSS |
 | **sportsphere-coach-platform** | `:3002` | Coach & Scouting Platform (Radar, Talent Scouting, Tactical Analytics) | React, Vite, TypeScript, TailwindCSS |
@@ -27,11 +28,18 @@ SportSphere consists of 4 integrated web applications running seamlessly togethe
 
 Each platform can be started independently:
 
-#### Central Auth Portal (Port 3003)
+#### Central Auth & Login Gateway (Port 3004)
 ```bash
 cd sportsphere-auth
 npm install
-npm run dev -- --port 3003
+npm run dev
+```
+
+#### Admin Governance Console (Port 3003)
+```bash
+cd sportsphere-admin
+npm install
+npm run dev
 ```
 
 #### Student / Athlete Dashboard (Port 3000)

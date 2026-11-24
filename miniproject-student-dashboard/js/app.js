@@ -3360,7 +3360,7 @@ export function handleLogout() {
   }
   showToast('Logging out of SportSphere...', 'info');
   setTimeout(() => {
-    window.location.href = 'http://localhost:3003';
+    window.location.href = 'http://localhost:3004';
   }, 350);
 }
 

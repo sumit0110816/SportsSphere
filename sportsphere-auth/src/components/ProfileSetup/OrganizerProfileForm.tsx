@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import {
+  ShieldCheck,
+  ArrowRight,
+  ArrowLeft,
+  Building2,
+  Mail,
+  Phone,
+  CreditCard,
+  FileCheck,
+  Upload,
+  CheckCircle,
+  FileText,
+  AlertCircle,
+} from 'lucide-react';
 import { ROLE_CONFIG, type OrganizerProfileData } from '../../types/auth';
 
 interface OrganizerProfileFormProps {
@@ -10,10 +23,6 @@ interface OrganizerProfileFormProps {
   onSubmit: (profile: OrganizerProfileData) => void;
 }
 
-const AVATAR_PRESETS = [
-  '🏆', '🏟️', '🏅', '🎯', '🛡️', '⚡', '🎪', '🌐'
-];
-
 export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
   initialEmail,
   initialName = '',
@@ -22,49 +31,131 @@ export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
 }) => {
   const config = ROLE_CONFIG.organizer;
 
-  const defaultName = initialName || (initialEmail ? initialEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '');
+  const defaultName =
+    initialName ||
+    (initialEmail ? initialEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()) : '');
 
   const [fullName, setFullName] = useState(defaultName);
-  const [designation, setDesignation] = useState('');
-  const [organizationName, setOrganizationName] = useState('');
-  const [organizationType, setOrganizationType] = useState('Regional Sports Association');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [phone, setPhone] = useState('');
-  const [website, setWebsite] = useState('');
-  const [bio, setBio] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState('🏆');
+  const [collegeName, setCollegeName] = useState('IIT Delhi');
+  const [collegeEmail, setCollegeEmail] = useState(initialEmail || '');
+  const [contactNumber, setContactNumber] = useState('+91 98765 43210');
+  const [collegeId, setCollegeId] = useState('2023CS1089');
+  const [department, setDepartment] = useState('Board for Sports Activities (BSA)');
+  const [designation, setDesignation] = useState('Sports Council Convener');
+  const [bio, setBio] = useState('Authorized student tournament director coordinating inter-collegiate championships.');
+
+  // Document Uploads & Previews
+  const [collegeIdDocName, setCollegeIdDocName] = useState('College_ID_Card.png');
+  const [collegeIdDocUrl, setCollegeIdDocUrl] = useState(
+    'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80'
+  );
+  const [nocLetterName, setNocLetterName] = useState('Dean_Sports_NOC_Letter.pdf');
+  const [nocLetterUrl, setNocLetterUrl] = useState(
+    'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80'
+  );
+
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // File picker handler for ID Card
+  const handleIdUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCollegeIdDocName(file.name);
+      const fakeUrl = URL.createObjectURL(file);
+      setCollegeIdDocUrl(fakeUrl);
+    }
+  };
+
+  // File picker handler for NOC Letter
+  const handleNocUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setNocLetterName(file.name);
+      const fakeUrl = URL.createObjectURL(file);
+      setNocLetterUrl(fakeUrl);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     if (!fullName.trim()) {
-      setError('Please provide your name');
+      setError('Please provide your full legal name');
       return;
     }
-    if (!organizationName.trim()) {
-      setError('Please provide your organization or league name');
+    if (!collegeEmail.trim() || !collegeEmail.includes('@')) {
+      setError('Please provide your official college email');
+      return;
+    }
+    if (!contactNumber.trim() || contactNumber.length < 8) {
+      setError('Please provide a valid official contact number');
+      return;
+    }
+    if (!collegeId.trim()) {
+      setError('Please enter your official College ID or Student ID');
+      return;
+    }
+    if (!collegeName.trim()) {
+      setError('Please specify your affiliated College / University name');
       return;
     }
 
-    onSubmit({
+    setIsSubmitting(true);
+
+    const profileData: OrganizerProfileData = {
       fullName: fullName.trim(),
-      designation: designation.trim() || 'Tournament Director',
-      organizationName: organizationName.trim(),
-      organizationType,
-      city: city.trim(),
-      state: state.trim(),
-      phone: phone.trim(),
-      website: website.trim(),
+      collegeEmail: collegeEmail.trim(),
+      contactNumber: contactNumber.trim(),
+      collegeId: collegeId.trim(),
+      collegeName: collegeName.trim(),
+      department: department.trim(),
+      designation: designation.trim() || 'Tournament Organizer',
+      organizationName: collegeName.trim(),
+      organizationType: 'Collegiate Sports Council',
+      phone: contactNumber.trim(),
+      collegeIdDocUrl,
+      nocLetterUrl,
       bio: bio.trim(),
-      avatar: selectedAvatar && selectedAvatar.startsWith('http')
-        ? selectedAvatar
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName.trim())}&background=d97706&color=fff&size=256&bold=true`,
-    });
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        fullName.trim()
+      )}&background=d97706&color=fff&size=256&bold=true`,
+    };
+
+    // Forward to backend sync for immediate Admin review
+    try {
+      await fetch('/api/sync/submit-organizer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: profileData.fullName,
+          email: initialEmail || profileData.collegeEmail,
+          collegeEmail: profileData.collegeEmail,
+          phone: profileData.contactNumber,
+          contactNumber: profileData.contactNumber,
+          collegeName: profileData.collegeName,
+          studentId: profileData.collegeId,
+          collegeId: profileData.collegeId,
+          department: profileData.department,
+          collegeIdDocUrl,
+          nocLetterUrl,
+          documents: [
+            { name: collegeIdDocName, url: collegeIdDocUrl, type: 'image', size: '1.4 MB' },
+            { name: nocLetterName, url: nocLetterUrl, type: 'pdf', size: '2.3 MB' },
+          ],
+        }),
+      });
+    } catch {
+      // Local sync fallback
+    }
+
+    setIsSubmitting(false);
+    onSubmit(profileData);
   };
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
+    <div style={{ maxWidth: '680px', margin: '0 auto', width: '100%' }}>
       {/* Back button */}
       <button
         onClick={onBack}
@@ -97,7 +188,7 @@ export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
         }}
       >
         {/* Step Indicator & Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div
             style={{
               display: 'inline-flex',
@@ -116,56 +207,41 @@ export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
             }}
           >
             <ShieldCheck size={12} />
-            Step 3 of 3 • Organizer Profile
+            Organizer Verification Dossier • Admin Gated
           </div>
 
           <h2
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '26px',
+              fontSize: '24px',
               fontWeight: 800,
               color: '#0F172A',
               margin: '0 0 6px',
             }}
           >
-            Setup Organizer Organization
+            Organizer Authorization Credentials
           </h2>
           <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-            Account: <strong style={{ color: config.color }}>{initialEmail || 'organizer@sportsphere.org'}</strong>
+            Submit your university affiliation, ID proof, and Dean NOC letter. SportSphere Admin must authorize your application before access to the Organizer Studio (Port 3001) is granted.
           </p>
         </div>
 
-        {/* Avatar Preset Selector */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px' }}>
-          <label className="field-label" style={{ marginBottom: '10px' }}>Organization Seal / Icon</label>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {AVATAR_PRESETS.map((icon) => {
-              const isSelected = selectedAvatar === icon;
-              return (
-                <button
-                  key={icon}
-                  type="button"
-                  onClick={() => setSelectedAvatar(icon)}
-                  style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '50%',
-                    background: isSelected ? '#FFFBEB' : '#F1F5F9',
-                    border: `2px solid ${isSelected ? '#D97706' : '#CBD5E1'}`,
-                    fontSize: '22px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transform: isSelected ? 'scale(1.12)' : 'scale(1)',
-                    boxShadow: isSelected ? '0 0 16px rgba(217, 119, 6, 0.25)' : 'none',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {icon}
-                </button>
-              );
-            })}
+        {/* Verification Policy Banner */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+            padding: '12px 16px',
+            borderRadius: '10px',
+            backgroundColor: '#FFFBEB',
+            border: '1px solid #FDE68A',
+            marginBottom: '22px',
+          }}
+        >
+          <AlertCircle size={18} color="#D97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ fontSize: '12.5px', color: '#92400E', lineHeight: 1.45 }}>
+            <strong>Institutional Governance:</strong> Student & faculty organizers are authorized exclusively for their verified college. Uploaded documents are audited in real time by the Platform Admin.
           </div>
         </div>
 
@@ -187,116 +263,216 @@ export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          {/* Row 1: Org Name & Type */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '14px' }}>
+          {/* Row 1: Full Name & College Name */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div>
-              <label className="field-label">Organization / League Name *</label>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Building2 size={13} color="#D97706" />
+                Affiliated College / University *
+              </label>
               <input
                 type="text"
-                value={organizationName}
-                onChange={(e) => setOrganizationName(e.target.value)}
-                placeholder="e.g. Apex Sports League"
+                value={collegeName}
+                onChange={(e) => setCollegeName(e.target.value)}
+                placeholder="e.g. IIT Delhi / BITS Pilani / COEP"
                 className="auth-input auth-input-organizer"
                 required
               />
             </div>
-            <div>
-              <label className="field-label">Entity Type</label>
-              <select
-                value={organizationType}
-                onChange={(e) => setOrganizationType(e.target.value)}
-                className="auth-input auth-select auth-input-organizer"
-              >
-                <option value="Regional Sports Association">Regional Association</option>
-                <option value="School / College Athletic Board">School / College Board</option>
-                <option value="Private Sports Club / Academy">Club / Academy</option>
-                <option value="Corporate Sports League">Corporate League</option>
-                <option value="Non-profit Foundation">Non-profit Foundation</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Row 2: Full Name & Designation */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div>
               <label className="field-label">Organizer Full Name *</label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
+                placeholder="Full Legal Name"
+                className="auth-input auth-input-organizer"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Official College Email & Contact Number */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '14px' }}>
+            <div>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Mail size={13} color="#D97706" />
+                Official College Email (.edu / .ac.in) *
+              </label>
+              <input
+                type="email"
+                value={collegeEmail}
+                onChange={(e) => setCollegeEmail(e.target.value)}
+                placeholder="e.g. student.sports@iitd.ac.in"
                 className="auth-input auth-input-organizer"
                 required
               />
             </div>
             <div>
-              <label className="field-label">Your Title / Role</label>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Phone size={13} color="#D97706" />
+                Contact Number *
+              </label>
+              <input
+                type="tel"
+                value={contactNumber}
+                onChange={(e) => setContactNumber(e.target.value)}
+                placeholder="+91 98765 43210"
+                className="auth-input auth-input-organizer"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Row 3: College ID Number, Department & Designation */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+            <div>
+              <label className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CreditCard size={13} color="#D97706" />
+                College / Student ID *
+              </label>
+              <input
+                type="text"
+                value={collegeId}
+                onChange={(e) => setCollegeId(e.target.value)}
+                placeholder="e.g. 2023CS1089"
+                className="auth-input auth-input-organizer"
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label">Department</label>
+              <input
+                type="text"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                placeholder="e.g. Sports Board"
+                className="auth-input auth-input-organizer"
+              />
+            </div>
+            <div>
+              <label className="field-label">Role / Designation</label>
               <input
                 type="text"
                 value={designation}
                 onChange={(e) => setDesignation(e.target.value)}
-                placeholder="e.g. Tournament Director / Sports Secretary"
+                placeholder="e.g. Sports Convener"
                 className="auth-input auth-input-organizer"
               />
             </div>
           </div>
 
-          {/* Row 3: City & State */}
+          {/* Row 4: Mandatory Document Uploads */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <div>
-              <label className="field-label">City</label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="e.g. Mumbai"
-                className="auth-input auth-input-organizer"
-              />
+            {/* College ID Card Upload */}
+            <div
+              style={{
+                border: '1.5px dashed #CBD5E1',
+                borderRadius: '12px',
+                padding: '16px',
+                backgroundColor: '#F8FAFC',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CreditCard size={14} color="#D97706" />
+                  College ID Card Proof *
+                </span>
+                <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <CheckCircle size={12} /> Ready
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', padding: '8px 10px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                <FileText size={16} color="#64748B" />
+                <span style={{ fontSize: '12px', color: '#1E293B', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {collegeIdDocName}
+                </span>
+                <label
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: '#D97706',
+                    background: '#FFFBEB',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    border: '1px solid #FDE68A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Upload size={11} /> Change
+                  <input type="file" accept="image/*,.pdf" onChange={handleIdUpload} style={{ display: 'none' }} />
+                </label>
+              </div>
+              <p style={{ margin: 0, fontSize: '11px', color: '#64748B' }}>
+                Scanned student or faculty ID showing name, college & photo.
+              </p>
             </div>
-            <div>
-              <label className="field-label">State / Province</label>
-              <input
-                type="text"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                placeholder="e.g. Maharashtra"
-                className="auth-input auth-input-organizer"
-              />
-            </div>
-          </div>
 
-          {/* Row 4: Phone & Website */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <div>
-              <label className="field-label">Official Contact Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="auth-input auth-input-organizer"
-              />
-            </div>
-            <div>
-              <label className="field-label">Official Website URL</label>
-              <input
-                type="url"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                placeholder="https://yourorganization.org"
-                className="auth-input auth-input-organizer"
-              />
+            {/* Dean NOC Letter Upload */}
+            <div
+              style={{
+                border: '1.5px dashed #CBD5E1',
+                borderRadius: '12px',
+                padding: '16px',
+                backgroundColor: '#F8FAFC',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <FileCheck size={14} color="#D97706" />
+                  Dean / Sports Advisor NOC *
+                </span>
+                <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <CheckCircle size={12} /> Ready
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', padding: '8px 10px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                <FileText size={16} color="#64748B" />
+                <span style={{ fontSize: '12px', color: '#1E293B', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {nocLetterName}
+                </span>
+                <label
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: '#D97706',
+                    background: '#FFFBEB',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    border: '1px solid #FDE68A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Upload size={11} /> Change
+                  <input type="file" accept="image/*,.pdf" onChange={handleNocUpload} style={{ display: 'none' }} />
+                </label>
+              </div>
+              <p style={{ margin: 0, fontSize: '11px', color: '#64748B' }}>
+                Official authorization letter on university letterhead with seal.
+              </p>
             </div>
           </div>
 
           {/* Org Bio */}
           <div>
-            <label className="field-label">Tournament Portfolio & Scope</label>
+            <label className="field-label">Tournament Scope & Experience</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              rows={3}
-              placeholder="Describe your tournaments, participating clubs, or season schedule..."
+              rows={2}
+              placeholder="Detail your tournament plans, inter-college events, or previous sports meets..."
               className="auth-input auth-input-organizer"
               style={{ resize: 'vertical' }}
             />
@@ -305,6 +481,7 @@ export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
           {/* Submit */}
           <button
             type="submit"
+            disabled={isSubmitting}
             className="btn-primary btn-organizer"
             style={{
               marginTop: '10px',
@@ -312,9 +489,11 @@ export const OrganizerProfileForm: React.FC<OrganizerProfileFormProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              opacity: isSubmitting ? 0.7 : 1,
             }}
           >
-            <span>Complete Setup & Launch Organizer Studio (Port 3001)</span>
+            <span>Submit Verification Dossier to Platform Admin</span>
             <ArrowRight size={18} />
           </button>
         </form>
