@@ -50,6 +50,13 @@ function sharedSyncPlugin(): Plugin {
           return;
         }
 
+        if (req.url === '/api/sync/events' && req.method === 'GET') {
+          const db = readDb();
+          const events = Array.isArray(db.events) ? db.events : [];
+          res.end(JSON.stringify({ events }));
+          return;
+        }
+
         if (req.url?.startsWith('/api/sync/check-status') && req.method === 'GET') {
           const urlObj = new URL(req.url, 'http://localhost');
           const email = urlObj.searchParams.get('email')?.toLowerCase();
@@ -180,6 +187,40 @@ function sharedSyncPlugin(): Plugin {
                 db.coachApplications.unshift(newApp);
                 writeDb(db);
                 res.end(JSON.stringify({ success: true, application: newApp }));
+                return;
+              }
+
+              if (req.url === '/api/sync/publish-event') {
+                if (!Array.isArray(db.events)) {
+                  db.events = [];
+                }
+                const existingIdx = db.events.findIndex((e: any) => e.id === payload.id);
+                const publishedEvent = {
+                  id: payload.id || `evt-${Date.now()}`,
+                  title: payload.title,
+                  subtitle: payload.subtitle || "Men's & Women's • Intercollegiate Tournament",
+                  sport: payload.sport || 'Football',
+                  date: payload.date || 'Dec 15, 2026',
+                  daysLeft: payload.daysLeft || 14,
+                  venue: payload.venue || 'University Sports Complex',
+                  city: payload.city || 'National Campus Arena',
+                  registeredCount: payload.registeredCount || 0,
+                  totalCapacity: payload.totalCapacity || 16,
+                  status: payload.status || 'Open',
+                  fee: payload.fee || '₹500 / team',
+                  feeAmount: payload.feeAmount || 500,
+                  organizerName: payload.organizerName || 'Verified Collegiate Organizer',
+                  publishedAt: new Date().toISOString(),
+                };
+
+                if (existingIdx >= 0) {
+                  db.events[existingIdx] = { ...db.events[existingIdx], ...publishedEvent };
+                } else {
+                  db.events.unshift(publishedEvent);
+                }
+
+                writeDb(db);
+                res.end(JSON.stringify({ success: true, event: publishedEvent }));
                 return;
               }
 

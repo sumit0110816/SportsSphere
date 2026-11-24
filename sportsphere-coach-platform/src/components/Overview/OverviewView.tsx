@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import {
   Zap,
@@ -19,6 +19,7 @@ import {
 import { ATHLETES_DATA, TOURNAMENTS_DATA, HIGHLIGHT_REELS, NEWS_BULLETINS } from '../../data/mockData';
 import { HighlightReel, SportCategory, TabView, Tournament } from '../../types/sports';
 import { getLoggedInCoach } from '../../utils/userSession';
+import { fetchPublishedOrganizerTournaments } from '../../utils/syncTournaments';
 
 interface OverviewViewProps {
   onNavigate: (tab: TabView, targetId?: string) => void;
@@ -42,6 +43,34 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   });
 
   const [tournaments, setTournaments] = useState<Tournament[]>(TOURNAMENTS_DATA);
+
+  // Sync published tournaments from organizer
+  useEffect(() => {
+    let isMounted = true;
+    const syncTournaments = async () => {
+      const items = await fetchPublishedOrganizerTournaments();
+      if (!isMounted) return;
+      if (items.length > 0) {
+        setTournaments((prev) => {
+          const prevIds = new Set(prev.map((t) => t.id));
+          const newItems = items.filter((item) => !prevIds.has(item.id));
+          if (newItems.length > 0) {
+            return [...newItems, ...prev];
+          }
+          return prev;
+        });
+      }
+    };
+
+    syncTournaments();
+    const interval = setInterval(syncTournaments, 3000);
+    window.addEventListener('focus', syncTournaments);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', syncTournaments);
+    };
+  }, []);
 
   const toggleBookmark = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();

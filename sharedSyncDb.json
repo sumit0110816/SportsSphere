@@ -100,6 +100,18 @@
       "phone": "+91 99887 76655",
       "createdAt": "2026-11-24T14:23:53.401Z",
       "verificationNotes": "Certificate is not accredited by Badminton Association of India (BAI) or SAI."
+    },
+    {
+      "uid": "usr_1795530653712",
+      "email": "sumeetmargankop@gmail.com",
+      "fullName": "Sumeetmargankop",
+      "college": "IIT Delhi",
+      "roles": [
+        "organizer"
+      ],
+      "status": "approved",
+      "phone": "+91 98765 43210",
+      "createdAt": "2026-11-24T14:30:53.712Z"
     }
   ],
   "coachApplications": [
@@ -179,6 +191,36 @@
   ],
   "organizerApplications": [
     {
+      "id": "orgapp_1795530653712",
+      "uid": "usr_1795530653712",
+      "fullName": "Sumeetmargankop",
+      "email": "sumeetmargankop@gmail.com",
+      "phone": "+91 98765 43210",
+      "collegeName": "IIT Delhi",
+      "studentId": "2023CS1089",
+      "collegeEmail": "sumeetmargankop@gmail.com",
+      "department": "Board for Sports Activities (BSA)",
+      "nocLetterUrl": "blob:http://localhost:3004/9e622bc0-2e21-4f54-a600-38ba7d2c522d",
+      "documents": [
+        {
+          "name": "WhatsApp Image 2026-11-16 at 9.26.59 PM.jpeg",
+          "url": "blob:http://localhost:3004/30f110e9-7624-4f72-8b4a-60e250bf73fc",
+          "type": "image",
+          "size": "1.4 MB"
+        },
+        {
+          "name": "WhatsApp Image 2026-11-16 at 4.58.42 PM.jpeg",
+          "url": "blob:http://localhost:3004/9e622bc0-2e21-4f54-a600-38ba7d2c522d",
+          "type": "pdf",
+          "size": "2.3 MB"
+        }
+      ],
+      "status": "approved",
+      "submittedAt": "2026-11-24T14:30:53.712Z",
+      "reviewedAt": "2026-11-24T14:31:28.874Z",
+      "verificationNotes": "Authorized for IIT Delhi"
+    },
+    {
       "id": "orgapp_1795530220375",
       "uid": "usr_1795530220375",
       "fullName": "Test Organizer Dev",
@@ -233,8 +275,10 @@
           "size": "950 KB"
         }
       ],
-      "status": "pending",
-      "submittedAt": "2026-11-23T11:00:00Z"
+      "status": "approved",
+      "submittedAt": "2026-11-23T11:00:00Z",
+      "reviewedAt": "2026-11-24T14:31:30.814Z",
+      "verificationNotes": "Authorized for IIT Madras"
     },
     {
       "id": "orgapp_demo_1",
@@ -263,6 +307,76 @@
       ],
       "status": "pending",
       "submittedAt": "2026-11-24T12:30:00Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_national_track_2026",
+      "title": "All-India National Collegiate Track Invitational 2026",
+      "subtitle": "Men & Women . Open Athletics Championship",
+      "sport": "Athletics",
+      "date": "Jan 15, 2027",
+      "daysLeft": 25,
+      "venue": "Jawaharlal Nehru Stadium Track 1",
+      "city": "New Delhi Central",
+      "registeredCount": 4,
+      "totalCapacity": 120,
+      "status": "Open",
+      "fee": "?600 / athlete",
+      "feeAmount": 600,
+      "organizerName": "National Collegiate Athletics Council",
+      "publishedAt": "2026-11-24T14:45:31.536Z"
+    },
+    {
+      "id": "evt-1",
+      "title": "Intercollege Football Cup",
+      "subtitle": "Men's • Intercollege",
+      "sport": "Football",
+      "date": "Dec 12, 2026",
+      "daysLeft": 4,
+      "venue": "Bengaluru Football Stadium",
+      "city": "Bengaluru, KA",
+      "registeredCount": 14,
+      "totalCapacity": 16,
+      "status": "Open",
+      "fee": "₹1,500 / team",
+      "feeAmount": 1500,
+      "organizerName": "St. Xavier Sports Council",
+      "publishedAt": "2026-11-24T12:00:00Z"
+    },
+    {
+      "id": "evt-2",
+      "title": "Badminton Championship",
+      "subtitle": "Men's & Women's Open",
+      "sport": "Badminton",
+      "date": "Dec 18, 2026",
+      "daysLeft": 8,
+      "venue": "Indoor Stadium Court 1",
+      "city": "Delhi NCR Sports Hub",
+      "registeredCount": 42,
+      "totalCapacity": 64,
+      "status": "Open",
+      "fee": "₹400 / player",
+      "feeAmount": 400,
+      "organizerName": "Apex Institute of Tech",
+      "publishedAt": "2026-11-24T13:00:00Z"
+    },
+    {
+      "id": "evt-4",
+      "title": "Annual Athletics Meet",
+      "subtitle": "Open Track & Field Inter-Collegiate",
+      "sport": "Athletics",
+      "date": "Dec 24, 2026",
+      "daysLeft": 18,
+      "venue": "National Track & Field Complex",
+      "city": "Mumbai University Campus",
+      "registeredCount": 120,
+      "totalCapacity": 200,
+      "status": "Open",
+      "fee": "₹500 / athlete",
+      "feeAmount": 500,
+      "organizerName": "University Athletics Board",
+      "publishedAt": "2026-11-24T14:00:00Z"
     }
   ]
 }

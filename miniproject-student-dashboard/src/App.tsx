@@ -74,6 +74,86 @@ export default function App() {
     );
   };
 
+  // Helper to map organizer published event to Athlete Competition
+  const mapOrganizerEventToCompetition = (ev: any, lat: number, lng: number): Competition => {
+    const sportImages: Record<string, string> = {
+      Football: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80',
+      Badminton: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80',
+      Basketball: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80',
+      Athletics: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1200&q=80',
+      Swimming: 'https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&w=1200&q=80',
+      Volleyball: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1200&q=80',
+    };
+
+    const feeNum = ev.feeAmount || parseInt(String(ev.fee || '').replace(/\D/g, ''), 10) || 500;
+    const cat = ['Football', 'Badminton', 'Athletics', 'Basketball', 'Swimming', 'Volleyball'].find(
+      (s) => s.toLowerCase() === (ev.sport || '').toLowerCase()
+    ) || 'Athletics';
+
+    const eventLat = ev.latitude || 12.9716;
+    const eventLng = ev.longitude || 77.5946;
+
+    return {
+      id: ev.id,
+      title: ev.title,
+      category: cat as any,
+      circuitTier: 'University',
+      organizer: ev.organizerName || 'Verified Collegiate Organizer',
+      dateRange: ev.date || 'Dec 15–20, 2026',
+      venue: ev.venue || 'University Main Ground',
+      city: ev.city || 'Campus Stadium Hub',
+      latitude: eventLat,
+      longitude: eventLng,
+      distanceKm: calculateDistanceKm(lat, lng, eventLat, eventLng),
+      entryFee: ev.fee || `₹${feeNum} / team`,
+      feeAmount: feeNum,
+      deadline: `Closes in ${ev.daysLeft || 10} days`,
+      matchScore: 94,
+      image: sportImages[cat] || sportImages.Athletics,
+      tags: ['Organizer Published', 'Verified Open Tournament', 'Scout Calibrated'],
+      eligibility: 'Open to All Enrolled Varsity Athletes',
+      description: ev.subtitle || 'Official tournament published by authorized Sports Organizer on SportSphere.',
+      registeredCount: ev.registeredCount || 0,
+      maxSlots: ev.totalCapacity || 16,
+      isBookmarked: false,
+    };
+  };
+
+  // Poll & sync published events from organizer across ports
+  useEffect(() => {
+    const fetchSyncEvents = async () => {
+      try {
+        let res = await fetch('/api/sync/events');
+        if (!res.ok) {
+          res = await fetch('http://localhost:3004/api/sync/events');
+        }
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.events)) {
+            setCompetitions((prev) => {
+              const prevIds = new Set(prev.map((c) => c.id));
+              const newItems = data.events
+                .filter((ev: any) => ev.status === 'Open' && !prevIds.has(ev.id))
+                .map((ev: any) => mapOrganizerEventToCompetition(ev, userLocation.latitude, userLocation.longitude));
+              if (newItems.length > 0) {
+                return [...newItems, ...prev];
+              }
+              return prev;
+            });
+          }
+        }
+      } catch {}
+    };
+
+    fetchSyncEvents();
+    const interval = setInterval(fetchSyncEvents, 3000);
+    window.addEventListener('focus', fetchSyncEvents);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', fetchSyncEvents);
+    };
+  }, [userLocation.latitude, userLocation.longitude]);
+
   // Browser Geolocation Detection
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {

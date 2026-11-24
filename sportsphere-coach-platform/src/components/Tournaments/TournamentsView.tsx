@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
@@ -22,6 +22,7 @@ import {
 import { TOURNAMENTS_DATA, ATHLETES_DATA } from '../../data/mockData';
 import { SportCategory, Tournament } from '../../types/sports';
 import { getLoggedInCoach } from '../../utils/userSession';
+import { fetchPublishedOrganizerTournaments } from '../../utils/syncTournaments';
 
 interface TournamentsViewProps {
   onShowToast: (title: string, message?: string, type?: 'success' | 'info' | 'warning') => void;
@@ -55,6 +56,34 @@ export const TournamentsView: React.FC<TournamentsViewProps> = ({
   const [venuePreviewModal, setVenuePreviewModal] = useState<Tournament | null>(null);
 
   const [tournaments, setTournaments] = useState<Tournament[]>(TOURNAMENTS_DATA);
+
+  // Sync published tournaments from organizer
+  useEffect(() => {
+    let isMounted = true;
+    const syncTournaments = async () => {
+      const items = await fetchPublishedOrganizerTournaments();
+      if (!isMounted) return;
+      if (items.length > 0) {
+        setTournaments((prev) => {
+          const prevIds = new Set(prev.map((t) => t.id));
+          const newItems = items.filter((item) => !prevIds.has(item.id));
+          if (newItems.length > 0) {
+            return [...newItems, ...prev];
+          }
+          return prev;
+        });
+      }
+    };
+
+    syncTournaments();
+    const interval = setInterval(syncTournaments, 3000);
+    window.addEventListener('focus', syncTournaments);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', syncTournaments);
+    };
+  }, []);
 
   const sportsList: { key: SportCategory; label: string; count?: number }[] = [
     { key: 'all', label: 'All Sports', count: 28 },

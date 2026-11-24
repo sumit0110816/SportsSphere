@@ -86,6 +86,45 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Broadcast published event to Athlete and Coach ecosystems
+  const broadcastPublishedEvent = async (event: SportEvent) => {
+    try {
+      await fetch('/api/sync/publish-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      });
+    } catch {
+      try {
+        await fetch('http://localhost:3004/api/sync/publish-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event),
+        });
+      } catch {}
+    }
+  };
+
+  // Sync existing events on mount
+  useEffect(() => {
+    const fetchSyncEvents = async () => {
+      try {
+        const res = await fetch('/api/sync/events');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.events) && data.events.length > 0) {
+            setEvents((prev) => {
+              const prevIds = new Set(prev.map((e) => e.id));
+              const newItems = data.events.filter((e: SportEvent) => !prevIds.has(e.id));
+              return [...newItems, ...prev];
+            });
+          }
+        }
+      } catch {}
+    };
+    fetchSyncEvents();
+  }, []);
+
   // Event Handlers
   const handleCreateEvent = (newEventData: Omit<SportEvent, 'id'>) => {
     const created: SportEvent = {
@@ -93,6 +132,9 @@ export default function App() {
       id: `evt-${Date.now()}`,
     };
     setEvents((prev) => [created, ...prev]);
+    if (created.status === 'Open') {
+      broadcastPublishedEvent(created);
+    }
     setActivities((prev) => [
       {
         id: `act-${Date.now()}`,
@@ -105,10 +147,20 @@ export default function App() {
   };
 
   const handlePublishEvent = (eventId: string) => {
+    let publishedItem: SportEvent | null = null;
     setEvents((prev) =>
-      prev.map((ev) => (ev.id === eventId ? { ...ev, status: 'Open' } : ev))
+      prev.map((ev) => {
+        if (ev.id === eventId) {
+          publishedItem = { ...ev, status: 'Open' };
+          return publishedItem;
+        }
+        return ev;
+      })
     );
-    showToast('Event published and opened for athlete registrations!');
+    if (publishedItem) {
+      broadcastPublishedEvent(publishedItem);
+    }
+    showToast('Event published and opened for athlete & coach discovery!');
   };
 
   const handleApplicantDecision = (id: string, decision: 'Approved' | 'Declined') => {
