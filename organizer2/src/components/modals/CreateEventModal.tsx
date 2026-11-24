@@ -18,9 +18,13 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState("Men's & Women's • Intercollege");
   const [sport, setSport] = useState('Football');
-  const [venue, setVenue] = useState('Main Ground');
+  const [circuitTier, setCircuitTier] = useState<'District' | 'State' | 'National' | 'University'>('District');
+  const [district, setDistrict] = useState('Belagavi');
+  const [state, setState] = useState('Karnataka');
+  const [city, setCity] = useState('Belagavi');
+  const [venue, setVenue] = useState('Main Ground JCER');
   const [capacity, setCapacity] = useState('16');
-  const [date, setDate] = useState('Nov 15, 2024');
+  const [date, setDate] = useState('Dec 15, 2026');
 
   if (!isOpen) return null;
 
@@ -32,16 +36,20 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       title: title.trim(),
       subtitle,
       sport,
+      circuitTier,
+      district,
+      state,
+      city: city || district,
       date,
       daysLeft: 14,
       daysLeftColor: 'blue',
       venue,
       registeredCount: 0,
       totalCapacity: parseInt(capacity, 10) || 16,
-      status: 'Open',
+      status: 'pending',
     });
 
-    showToast(`"${title}" published to SportSync!`);
+    showToast(`"${title}" submitted for Admin Sanction (:3003)!`);
     setTitle('');
     onClose();
   };
@@ -123,6 +131,80 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
+                  Circuit Level / Tier <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={circuitTier}
+                  onChange={(e) => setCircuitTier(e.target.value as any)}
+                  className="w-full text-xs rounded-lg border border-slate-300 p-2.5 bg-white focus:border-blue-500 outline-hidden transition-colors font-medium"
+                >
+                  <option value="District">District Level</option>
+                  <option value="State">State Level</option>
+                  <option value="National">National Level</option>
+                  <option value="University">University Level</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Category / Division
+                </label>
+                <input
+                  type="text"
+                  value={subtitle}
+                  onChange={(e) => setSubtitle(e.target.value)}
+                  placeholder="e.g. Men's • Intercollegiate"
+                  className="w-full text-xs rounded-lg border border-slate-300 p-2.5 outline-hidden focus:border-blue-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2.5">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  District <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  placeholder="e.g. Belagavi"
+                  required
+                  className="w-full text-xs rounded-lg border border-slate-300 p-2.5 outline-hidden focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  State <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="e.g. Karnataka"
+                  required
+                  className="w-full text-xs rounded-lg border border-slate-300 p-2.5 outline-hidden focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  City / Zone
+                </label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="e.g. Belagavi"
+                  className="w-full text-xs rounded-lg border border-slate-300 p-2.5 outline-hidden focus:border-blue-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
                   Official Venue <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -158,14 +240,16 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
                 type="text"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                placeholder="e.g. Nov 15, 2024"
+                placeholder="e.g. Dec 15, 2026"
                 className="w-full text-xs rounded-lg border border-slate-300 p-2.5 outline-hidden focus:border-blue-500 transition-colors"
               />
             </div>
 
-            <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-100 flex items-center gap-2.5 text-[11px] text-blue-700">
-              <Sparkles className="w-4 h-4 shrink-0 text-blue-600 animate-spin" style={{ animationDuration: '6s' }} />
-              <span>Uses 1 Organizer Credit. Auto-creates verification queues &amp; bracket slots.</span>
+            <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200 flex items-start gap-2.5 text-[11px] text-amber-800">
+              <Sparkles className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+              <span>
+                <strong>🛡️ Platform Admin Review:</strong> All events undergo administrative sanctioning on Port 3003. Once approved, the event will instantly appear for Athlete (:3000) & Coach (:3002) registration.
+              </span>
             </div>
 
             {/* Actions */}
@@ -179,9 +263,9 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="btn-interactive btn-shine px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-xs shadow-blue-600/30 cursor-pointer"
+                className="btn-interactive btn-shine px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-xs shadow-blue-600/30 cursor-pointer flex items-center gap-1.5"
               >
-                Publish Event
+                <span>Submit for Admin Sanction</span>
               </button>
             </div>
           </form>

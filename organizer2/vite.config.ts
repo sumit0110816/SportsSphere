@@ -45,9 +45,14 @@ function sharedSyncPlugin(): Plugin {
           return;
         }
 
-        if (req.url === '/api/sync/events' && req.method === 'GET') {
+        if (req.url?.startsWith('/api/sync/events') && req.method === 'GET') {
           const db = readDb();
-          const events = Array.isArray(db.events) ? db.events : [];
+          const allEvents = Array.isArray(db.events) ? db.events : [];
+          const urlObj = new URL(req.url, 'http://localhost');
+          const showAll = urlObj.searchParams.get('all') === 'true';
+          const events = showAll
+            ? allEvents
+            : allEvents.filter((e: any) => e.status === 'published' || e.status === 'Open');
           res.end(JSON.stringify({ events }));
           return;
         }
@@ -74,9 +79,12 @@ function sharedSyncPlugin(): Plugin {
                 daysLeft: payload.daysLeft || 14,
                 venue: payload.venue || 'University Sports Complex',
                 city: payload.city || 'National Campus Arena',
+                district: payload.district || payload.city || 'Central District',
+                state: payload.state || 'Karnataka',
+                circuitTier: payload.circuitTier || 'District',
                 registeredCount: payload.registeredCount || 0,
                 totalCapacity: payload.totalCapacity || 16,
-                status: payload.status || 'Open',
+                status: payload.status || 'pending',
                 fee: payload.fee || '₹500 / team',
                 feeAmount: payload.feeAmount || 500,
                 organizerName: payload.organizerName || 'Verified Collegiate Organizer',
@@ -96,6 +104,35 @@ function sharedSyncPlugin(): Plugin {
               res.statusCode = 400;
               res.end(JSON.stringify({ error: String(err) }));
               return;
+            }
+          });
+          return;
+        }
+
+        if (req.url === '/api/sync/update-event-status' && req.method === 'POST') {
+          let body = '';
+          req.on('data', (chunk) => {
+            body += chunk;
+          });
+          req.on('end', () => {
+            try {
+              const payload = JSON.parse(body || '{}');
+              const { eventId, status, reason } = payload;
+              const db = readDb();
+              if (!Array.isArray(db.events)) {
+                db.events = [];
+              }
+              const ev = db.events.find((e: any) => e.id === eventId);
+              if (ev) {
+                ev.status = status;
+                if (reason) ev.rejectionReason = reason;
+                ev.sanctionedAt = new Date().toISOString();
+              }
+              writeDb(db);
+              res.end(JSON.stringify({ success: true, event: ev }));
+            } catch (err) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: String(err) }));
             }
           });
           return;

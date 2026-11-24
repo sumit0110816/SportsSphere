@@ -12,17 +12,32 @@ export const mapOrganizerEventToCoachTournament = (ev: any): Tournament => {
 
   const sportCategory = (ev.sport || '').toLowerCase() as SportCategory;
 
+  const mappedLevel =
+    ev.circuitTier === 'District'
+      ? 'District Level'
+      : ev.circuitTier === 'State'
+      ? 'State Level'
+      : ev.circuitTier === 'National'
+      ? 'National Qualifier'
+      : 'District Level';
+
+  const fullLocation = ev.district && ev.state
+    ? `${ev.venue}, ${ev.district}, ${ev.state}`
+    : ev.city
+    ? `${ev.venue}, ${ev.city}`
+    : ev.venue || 'Campus Stadium Complex';
+
   return {
     id: ev.id,
     title: ev.title,
     sport: sportCategory || 'athletics',
-    level: 'State Level',
-    tag: 'Organizer Sanctioned',
+    level: mappedLevel,
+    tag: 'Admin Sanctioned',
     urgency: `Open • ${ev.daysLeft || 10}d left`,
     image: sportImages[ev.sport] || sportImages.Athletics,
     dates: ev.date || 'Dec 10 – 14, 2026',
     venue: ev.venue || 'Varsity Sports Arena',
-    location: ev.venue || 'Campus Stadium Complex',
+    location: fullLocation,
     eligibility: 'U19 & Collegiate Verified Athletes',
     division: ev.subtitle || "Men's & Women's Open",
     fee: ev.fee || '₹500 Entry',
@@ -31,10 +46,10 @@ export const mapOrganizerEventToCoachTournament = (ev: any): Tournament => {
     isBookmarked: false,
     scoutPresence: 'Accredited Coach Evaluation Tables Confirmed',
     criteria: 'Registered collegiate rosters & verified club athletes',
-    distanceMiles: 4.2,
-    distanceKm: 6.8,
+    distanceMiles: ev.distanceMiles || 4.2,
+    distanceKm: ev.distanceKm || 6.8,
     driveTime: '12 mins drive',
-    city: ev.city || 'Regional Sports Hub',
+    city: ev.district || ev.city || 'Regional Sports Hub',
     isNearby: true,
   };
 };
@@ -49,7 +64,7 @@ export const fetchPublishedOrganizerTournaments = async (): Promise<Tournament[]
       const data = await res.json();
       if (Array.isArray(data.events)) {
         return data.events
-          .filter((ev: any) => ev.status === 'Open')
+          .filter((ev: any) => ev.status === 'published' || ev.status === 'Open')
           .map((ev: any) => mapOrganizerEventToCoachTournament(ev));
       }
     }

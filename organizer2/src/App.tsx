@@ -105,24 +105,48 @@ export default function App() {
     }
   };
 
-  // Sync existing events on mount
+  // Sync existing events on mount and poll for status updates
   useEffect(() => {
     const fetchSyncEvents = async () => {
       try {
-        const res = await fetch('/api/sync/events');
+        let res = await fetch('/api/sync/events?all=true');
+        if (!res.ok) {
+          res = await fetch('http://localhost:3004/api/sync/events?all=true');
+        }
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data.events) && data.events.length > 0) {
             setEvents((prev) => {
-              const prevIds = new Set(prev.map((e) => e.id));
-              const newItems = data.events.filter((e: SportEvent) => !prevIds.has(e.id));
-              return [...newItems, ...prev];
+              const prevMap = new Map(prev.map((e) => [e.id, e]));
+              for (const ev of data.events) {
+                const existing = prevMap.get(ev.id);
+                if (existing) {
+                  prevMap.set(ev.id, {
+                    ...existing,
+                    status: ev.status === 'published' ? 'Open' : ev.status,
+                    rejectionReason: ev.rejectionReason,
+                    circuitTier: ev.circuitTier || existing.circuitTier,
+                    district: ev.district || existing.district,
+                    state: ev.state || existing.state,
+                    city: ev.city || existing.city,
+                  });
+                } else {
+                  prevMap.set(ev.id, {
+                    ...ev,
+                    status: ev.status === 'published' ? 'Open' : ev.status,
+                    daysLeft: ev.daysLeft || 14,
+                  });
+                }
+              }
+              return Array.from(prevMap.values());
             });
           }
         }
       } catch {}
     };
     fetchSyncEvents();
+    const interval = setInterval(fetchSyncEvents, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   // Event Handlers
@@ -130,15 +154,14 @@ export default function App() {
     const created: SportEvent = {
       ...newEventData,
       id: `evt-${Date.now()}`,
+      status: 'pending',
     };
     setEvents((prev) => [created, ...prev]);
-    if (created.status === 'Open') {
-      broadcastPublishedEvent(created);
-    }
+    broadcastPublishedEvent(created);
     setActivities((prev) => [
       {
         id: `act-${Date.now()}`,
-        text: `New event published: ${created.title}`,
+        text: `Submitted for Admin sanction: ${created.title}`,
         timeAgo: 'Just now',
         type: 'schedule',
       },
@@ -151,7 +174,7 @@ export default function App() {
     setEvents((prev) =>
       prev.map((ev) => {
         if (ev.id === eventId) {
-          publishedItem = { ...ev, status: 'Open' };
+          publishedItem = { ...ev, status: 'pending' };
           return publishedItem;
         }
         return ev;
@@ -160,7 +183,7 @@ export default function App() {
     if (publishedItem) {
       broadcastPublishedEvent(publishedItem);
     }
-    showToast('Event published and opened for athlete & coach discovery!');
+    showToast('Event submitted to Admin Console (:3003) for review & sanctioning!');
   };
 
   const handleApplicantDecision = (id: string, decision: 'Approved' | 'Declined') => {

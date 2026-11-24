@@ -900,6 +900,70 @@ export const suspendOrganizerRole = async (id: string, reason: string): Promise<
 
 // 5. EVENT APPROVALS
 export const getEvents = async (): Promise<TournamentEvent[]> => {
+  try {
+    const res = await fetch('/api/sync/events?all=true');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.events)) {
+        for (const ev of data.events) {
+          const existing = cachedEvents.find((e) => e.id === ev.id);
+          const mappedTier: TournamentEvent['circuitTier'] =
+            ev.circuitTier === 'District'
+              ? 'District'
+              : ev.circuitTier === 'State'
+              ? 'State'
+              : ev.circuitTier === 'National'
+              ? 'National'
+              : 'University';
+
+          const mappedStatus: TournamentEvent['status'] =
+            ev.status === 'Open'
+              ? 'published'
+              : ev.status === 'pending'
+              ? 'pending'
+              : ev.status === 'rejected'
+              ? 'rejected'
+              : ev.status === 'published'
+              ? 'published'
+              : ev.status || 'pending';
+
+          const mappedDates = ev.dates || {
+            start: ev.date || '2026-12-15',
+            end: ev.dateEnd || '2026-12-18',
+          };
+
+          if (existing) {
+            existing.status = mappedStatus;
+            if (ev.rejectionReason) existing.rejectionReason = ev.rejectionReason;
+          } else {
+            cachedEvents.unshift({
+              id: ev.id,
+              title: ev.title,
+              sport: ev.sport,
+              organizerId: ev.organizerId || 'org_user',
+              organizerName: ev.organizerName || 'Verified Collegiate Organizer',
+              college: ev.college || ev.organizerName || 'University Sports Council',
+              venue: ev.venue,
+              city: ev.city || 'Regional Sports Hub',
+              dates: mappedDates,
+              circuitTier: mappedTier,
+              registrationFee: ev.feeAmount || 500,
+              prizePool: ev.prizePool || '₹50,000',
+              maxTeams: ev.totalCapacity || 16,
+              registeredCount: ev.registeredCount || 0,
+              posterUrl:
+                ev.image ||
+                'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80',
+              status: mappedStatus,
+              submittedAt: ev.publishedAt || ev.submittedAt || new Date().toISOString(),
+              isAiSanctioned: false,
+              rejectionReason: ev.rejectionReason,
+            });
+          }
+        }
+      }
+    }
+  } catch {}
   return cachedEvents;
 };
 
@@ -912,6 +976,22 @@ export const updateEventStatus = async (
   if (ev) {
     ev.status = newStatus;
     if (reason) ev.rejectionReason = reason;
+
+    try {
+      await fetch('/api/sync/update-event-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId, status: newStatus, reason }),
+      });
+    } catch {
+      try {
+        await fetch('http://localhost:3004/api/sync/update-event-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventId, status: newStatus, reason }),
+        });
+      } catch {}
+    }
 
     const actionMap: Record<string, AuditLog['action']> = {
       approved: 'EVENT_APPROVAL',

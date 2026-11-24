@@ -23,9 +23,17 @@ export interface SportEvent {
   daysLeft: number;
   daysLeftColor?: 'red' | 'blue';
   venue: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  circuitTier?: 'District' | 'State' | 'National' | 'University';
   registeredCount: number;
   totalCapacity: number;
-  status: 'Open' | 'Draft' | 'Completed' | 'In Progress';
+  status: 'Open' | 'Draft' | 'Completed' | 'In Progress' | 'pending' | 'published' | 'rejected';
+  rejectionReason?: string;
+  fee?: string;
+  feeAmount?: number;
+  organizerName?: string;
 }
 
 export interface RegistrationApplicant {

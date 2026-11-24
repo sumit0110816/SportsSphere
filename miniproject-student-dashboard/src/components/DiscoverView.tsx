@@ -22,6 +22,7 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedTier, setSelectedTier] = useState<string>('All');
+  const [scopeFilter, setScopeFilter] = useState<'all' | 'nearby' | 'district' | 'state' | 'national'>('all');
   const [sortBy, setSortBy] = useState<'nearest' | 'match' | 'fee'>('nearest');
   const [minMatchScore, setMinMatchScore] = useState<number>(75);
   const [maxFee, setMaxFee] = useState<number>(2500);
@@ -35,16 +36,31 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
         !searchQuery ||
         comp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         comp.venue.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        comp.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
         comp.organizer.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesCategory =
         selectedCategory === 'All' || comp.category === selectedCategory;
 
       const matchesTier = selectedTier === 'All' || comp.circuitTier === selectedTier;
+
+      const matchesScope =
+        scopeFilter === 'all'
+          ? true
+          : scopeFilter === 'nearby'
+          ? (comp.distanceKm ?? 999) <= 15
+          : scopeFilter === 'district'
+          ? comp.circuitTier === 'District'
+          : scopeFilter === 'state'
+          ? comp.circuitTier === 'State'
+          : scopeFilter === 'national'
+          ? comp.circuitTier === 'National'
+          : true;
+
       const matchesScore = comp.matchScore >= minMatchScore;
       const matchesFee = comp.feeAmount <= maxFee;
 
-      return matchesSearch && matchesCategory && matchesTier && matchesScore && matchesFee;
+      return matchesSearch && matchesCategory && matchesTier && matchesScope && matchesScore && matchesFee;
     })
     .sort((a, b) => {
       if (sortBy === 'nearest') {
@@ -150,6 +166,37 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
               Reset Filters
             </button>
           </div>
+        </div>
+
+        {/* Geographic Scope Filter Row */}
+        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1 flex items-center gap-1">
+            <span className="material-symbols-outlined text-[15px] text-blue-600">travel_explore</span>
+            Geographic Scope:
+          </span>
+          {[
+            { id: 'all', label: 'All Meets', icon: 'public' },
+            { id: 'nearby', label: '📍 Nearby (< 15 km)', icon: 'near_me' },
+            { id: 'district', label: 'District Level', icon: 'domain' },
+            { id: 'state', label: 'State Level', icon: 'map' },
+            { id: 'national', label: 'National Level', icon: 'flag' },
+          ].map((scope) => (
+            <button
+              key={scope.id}
+              type="button"
+              onClick={() => {
+                setScopeFilter(scope.id as any);
+                showToast(`Filter set to ${scope.label}`);
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                scopeFilter === scope.id
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <span>{scope.label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Secondary Category and Tier Chips */}

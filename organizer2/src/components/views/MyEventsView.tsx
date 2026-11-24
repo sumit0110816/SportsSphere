@@ -25,20 +25,28 @@ export const MyEventsView: React.FC<MyEventsViewProps> = ({
   showToast,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'All' | 'Open' | 'Draft'>('All');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Open' | 'pending' | 'Draft'>('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const filtered = events.filter((ev) => {
     const matchesSearch =
       ev.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ev.sport.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ev.district && ev.district.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (ev.state && ev.state.toLowerCase().includes(searchQuery.toLowerCase())) ||
       ev.venue.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || ev.status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'All'
+        ? true
+        : statusFilter === 'Open'
+        ? ev.status === 'Open' || ev.status === 'published'
+        : ev.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const openCount = events.filter(e => e.status === 'Open').length;
-  const draftCount = events.filter(e => e.status === 'Draft').length;
+  const openCount = events.filter((e) => e.status === 'Open' || e.status === 'published').length;
+  const pendingCount = events.filter((e) => e.status === 'pending').length;
+  const draftCount = events.filter((e) => e.status === 'Draft').length;
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -46,7 +54,7 @@ export const MyEventsView: React.FC<MyEventsViewProps> = ({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">My Events</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Manage, organize, and monitor all tournaments.</p>
+          <p className="text-xs text-slate-500 mt-0.5">Manage, organize, and monitor all tournaments under collegiate governance.</p>
         </div>
         <button
           onClick={onOpenCreateModal}
@@ -58,11 +66,12 @@ export const MyEventsView: React.FC<MyEventsViewProps> = ({
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Total', value: events.length, icon: Trophy, color: 'blue' },
-          { label: 'Open', value: openCount, icon: Flame, color: 'emerald' },
-          { label: 'Draft', value: draftCount, icon: Clock, color: 'amber' },
+          { label: 'Sanctioned', value: openCount, icon: Flame, color: 'emerald' },
+          { label: 'Pending Review', value: pendingCount, icon: Clock, color: 'amber' },
+          { label: 'Draft', value: draftCount, icon: Clock, color: 'slate' },
         ].map(({ label, value, icon: Icon, color }) => (
           <div
             key={label}
@@ -71,7 +80,8 @@ export const MyEventsView: React.FC<MyEventsViewProps> = ({
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
               color === 'blue' ? 'bg-blue-100 text-blue-600' :
               color === 'emerald' ? 'bg-emerald-100 text-emerald-600' :
-              'bg-amber-100 text-amber-600'
+              color === 'amber' ? 'bg-amber-100 text-amber-600' :
+              'bg-slate-100 text-slate-600'
             }`}>
               <Icon className="w-4 h-4" />
             </div>
@@ -86,17 +96,22 @@ export const MyEventsView: React.FC<MyEventsViewProps> = ({
       {/* Filters & Search */}
       <div className="bg-white rounded-xl border border-slate-200 p-3 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-          {(['All', 'Open', 'Draft'] as const).map((st) => (
+          {[
+            { id: 'All', label: 'All' },
+            { id: 'Open', label: 'Sanctioned' },
+            { id: 'pending', label: 'Pending Sanction' },
+            { id: 'Draft', label: 'Draft' },
+          ].map((st) => (
             <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                statusFilter === st
+              key={st.id}
+              onClick={() => setStatusFilter(st.id as any)}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                statusFilter === st.id
                   ? 'bg-white text-blue-700 shadow-sm font-bold'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              {st}
+              {st.label}
             </button>
           ))}
         </div>
@@ -129,17 +144,33 @@ export const MyEventsView: React.FC<MyEventsViewProps> = ({
 
               <div className="p-4 flex flex-col gap-3 flex-1">
                 {/* Badges row */}
-                <div className="flex items-center justify-between">
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${sportStyle.bg} ${sportStyle.text}`}>
-                    {ev.sport}
-                  </span>
-                  {ev.status === 'Open' ? (
+                <div className="flex items-center justify-between gap-1 flex-wrap">
+                  <div className="flex items-center gap-1">
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${sportStyle.bg} ${sportStyle.text}`}>
+                      {ev.sport}
+                    </span>
+                    {ev.circuitTier && (
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                        {ev.circuitTier}
+                      </span>
+                    )}
+                  </div>
+                  {ev.status === 'Open' || ev.status === 'published' ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Live
+                      Sanctioned Live
+                    </span>
+                  ) : ev.status === 'pending' ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                      <Clock className="w-2.5 h-2.5 text-amber-600" />
+                      Pending Sanction ⏳
+                    </span>
+                  ) : ev.status === 'rejected' ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                      Rejected ❌
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                       Draft
                     </span>
                   )}
@@ -152,6 +183,16 @@ export const MyEventsView: React.FC<MyEventsViewProps> = ({
                   </h3>
                   <p className="text-[10px] text-slate-400 mt-0.5">{ev.subtitle}</p>
                 </div>
+
+                {/* Location / Tier badge */}
+                {(ev.district || ev.city || ev.state) && (
+                  <div className="text-[10px] font-medium text-blue-600 bg-blue-50/80 px-2 py-1 rounded-md border border-blue-100 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-blue-500 shrink-0" />
+                    <span>
+                      {ev.district || ev.city}{ev.state ? `, ${ev.state}` : ''}
+                    </span>
+                  </div>
+                )}
 
                 {/* Meta */}
                 <div className="space-y-1.5 text-[11px] text-slate-500">

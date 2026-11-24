@@ -350,21 +350,36 @@ export const TournamentsView: React.FC<TournamentsViewProps> = ({
       {/* Secondary Quick-Filters */}
       <section className="py-1">
         <div className="flex gap-2 overflow-x-auto no-scrollbar items-center text-xs">
-          <button
-            onClick={() => setSelectedLevel(selectedLevel === 'all' ? 'State' : 'all')}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold shrink-0 transition-colors ${
-              selectedLevel === 'State'
-                ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            <span>Level: {selectedLevel === 'all' ? "All (State, Nat'l)" : 'State Level'}</span>
-            <ChevronDown className="w-3.5 h-3.5" />
-          </button>
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-0.5">
+            Circuit Level:
+          </span>
+          {[
+            { id: 'all', label: 'All Levels' },
+            { id: 'district', label: 'District Level' },
+            { id: 'state', label: 'State Level' },
+            { id: 'national', label: 'National Qualifier' },
+          ].map((lvl) => (
+            <button
+              key={lvl.id}
+              onClick={() => {
+                setSelectedLevel(lvl.id === selectedLevel ? 'all' : lvl.id);
+                onShowToast('Circuit Level Filter', `Filtered to ${lvl.label}`, 'info');
+              }}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold shrink-0 transition-colors cursor-pointer ${
+                selectedLevel === lvl.id
+                  ? 'bg-blue-600 text-white shadow-xs font-bold'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <span>{lvl.label}</span>
+            </button>
+          ))}
+
+          <div className="h-4 w-px bg-slate-300 mx-1 shrink-0" />
 
           <button
             onClick={() => onShowToast('Filter Applied', 'Showing events in the next 30 days', 'info')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 font-semibold shrink-0 border border-blue-100"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 font-semibold shrink-0 border border-blue-100 cursor-pointer"
           >
             <Calendar className="w-3.5 h-3.5" />
             <span>Next 30 Days</span>

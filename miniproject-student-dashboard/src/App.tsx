@@ -93,15 +93,23 @@ export default function App() {
     const eventLat = ev.latitude || 12.9716;
     const eventLng = ev.longitude || 77.5946;
 
+    const tier = (['District', 'State', 'National', 'University'].includes(ev.circuitTier)
+      ? ev.circuitTier
+      : 'District') as any;
+
+    const locationName = ev.district && ev.state
+      ? `${ev.district}, ${ev.state}`
+      : ev.city || 'Belagavi, Karnataka';
+
     return {
       id: ev.id,
       title: ev.title,
       category: cat as any,
-      circuitTier: 'University',
+      circuitTier: tier,
       organizer: ev.organizerName || 'Verified Collegiate Organizer',
       dateRange: ev.date || 'Dec 15–20, 2026',
       venue: ev.venue || 'University Main Ground',
-      city: ev.city || 'Campus Stadium Hub',
+      city: locationName,
       latitude: eventLat,
       longitude: eventLng,
       distanceKm: calculateDistanceKm(lat, lng, eventLat, eventLng),
@@ -110,9 +118,9 @@ export default function App() {
       deadline: `Closes in ${ev.daysLeft || 10} days`,
       matchScore: 94,
       image: sportImages[cat] || sportImages.Athletics,
-      tags: ['Organizer Published', 'Verified Open Tournament', 'Scout Calibrated'],
+      tags: ['Admin Sanctioned', `${tier} Circuit`, 'Official Meet'],
       eligibility: 'Open to All Enrolled Varsity Athletes',
-      description: ev.subtitle || 'Official tournament published by authorized Sports Organizer on SportSphere.',
+      description: ev.subtitle || 'Official tournament sanctioned by Platform Admin on SportSphere.',
       registeredCount: ev.registeredCount || 0,
       maxSlots: ev.totalCapacity || 16,
       isBookmarked: false,
@@ -133,7 +141,7 @@ export default function App() {
             setCompetitions((prev) => {
               const prevIds = new Set(prev.map((c) => c.id));
               const newItems = data.events
-                .filter((ev: any) => ev.status === 'Open' && !prevIds.has(ev.id))
+                .filter((ev: any) => (ev.status === 'published' || ev.status === 'Open') && !prevIds.has(ev.id))
                 .map((ev: any) => mapOrganizerEventToCompetition(ev, userLocation.latitude, userLocation.longitude));
               if (newItems.length > 0) {
                 return [...newItems, ...prev];
