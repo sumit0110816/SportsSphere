@@ -7,7 +7,6 @@ import { StudentProfileForm } from './components/ProfileSetup/StudentProfileForm
 import { OrganizerProfileForm } from './components/ProfileSetup/OrganizerProfileForm';
 import { CoachProfileForm } from './components/ProfileSetup/CoachProfileForm';
 import { SuccessScreen } from './components/SuccessScreen';
-import { AdminLayout } from './components/Admin/AdminLayout';
 import {
   type UserRole,
   type AuthMode,
@@ -27,14 +26,6 @@ import {
 } from './firebase/authService';
 
 export const App: React.FC = () => {
-  const [isAdminView, setIsAdminView] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('view') === 'admin') return true;
-    }
-    return false; // Default to Login / Auth Portal on port 3003
-  });
-
   const [mode, setMode] = useState<AuthMode>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -242,17 +233,6 @@ export const App: React.FC = () => {
     ? credentials.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
     : '';
 
-  if (isAdminView) {
-    return (
-      <AdminLayout
-        onExitAdmin={() => setIsAdminView(false)}
-        onOpenPortal={() => {
-          window.open('http://localhost:3000', '_blank');
-        }}
-      />
-    );
-  }
-
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', background: '#F8FAFC' }}>
       {/* Background with clean light canvas */}
@@ -263,7 +243,9 @@ export const App: React.FC = () => {
         currentRole={selectedRole}
         mode={mode}
         onToggleMode={handleToggleMode}
-        onOpenAdmin={() => setIsAdminView(true)}
+        onOpenAdmin={() => {
+          window.location.href = 'http://localhost:3003';
+        }}
       />
 
       {/* Main Container */}
