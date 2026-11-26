@@ -41,8 +41,8 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
       roleFilter === 'all'
         ? true
         : roleFilter === 'multi'
-        ? u.roles.length > 1
-        : u.roles.includes(roleFilter);
+          ? u.roles.length > 1
+          : u.roles.includes(roleFilter);
 
     const matchesStatus = statusFilter === 'all' ? true : u.status === statusFilter;
 
@@ -312,23 +312,22 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                                 ? 'rgba(16, 185, 129, 0.15)'
                                 : '#ECFDF5'
                               : user.status === 'suspended'
-                              ? isDark
-                                ? 'rgba(239, 68, 68, 0.15)'
-                                : '#FEF2F2'
-                              : '#FFFBEB',
+                                ? isDark
+                                  ? 'rgba(239, 68, 68, 0.15)'
+                                  : '#FEF2F2'
+                                : '#FFFBEB',
                           color:
                             user.status === 'active'
                               ? '#059669'
                               : user.status === 'suspended'
-                              ? '#DC2626'
-                              : '#D97706',
-                          border: `1px solid ${
-                            user.status === 'active'
-                              ? '#A7F3D0'
-                              : user.status === 'suspended'
+                                ? '#DC2626'
+                                : '#D97706',
+                          border: `1px solid ${user.status === 'active'
+                            ? '#A7F3D0'
+                            : user.status === 'suspended'
                               ? '#FECACA'
                               : '#FDE68A'
-                          }`,
+                            }`,
                           textTransform: 'capitalize',
                         }}
                       >
@@ -472,11 +471,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                           ? 'rgba(37, 99, 235, 0.15)'
                           : '#EFF6FF'
                         : isDark
-                        ? '#0F172A'
-                        : '#F8FAFC',
-                      border: `1px solid ${
-                        isChecked ? '#3B82F6' : isDark ? '#334155' : '#E2E8F0'
-                      }`,
+                          ? '#0F172A'
+                          : '#F8FAFC',
+                      border: `1px solid ${isChecked ? '#3B82F6' : isDark ? '#334155' : '#E2E8F0'
+                        }`,
                       cursor: 'pointer',
                     }}
                   >

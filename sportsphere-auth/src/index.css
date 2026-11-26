@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -22,7 +24,9 @@
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   width: 100%;
 }
@@ -172,6 +176,7 @@ body {
   background: #0284C7;
   box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
 }
+
 .btn-student:hover {
   background: #0369A1;
 }
@@ -180,6 +185,7 @@ body {
   background: #D97706;
   box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
 }
+
 .btn-organizer:hover {
   background: #B45309;
 }
@@ -188,6 +194,7 @@ body {
   background: #4F46E5;
   box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
 }
+
 .btn-coach:hover {
   background: #4338CA;
 }
@@ -227,9 +234,17 @@ body {
   background: #1D4ED8;
 }
 
-.step-dot-student.active { background: #0284C7; }
-.step-dot-organizer.active { background: #D97706; }
-.step-dot-coach.active { background: #4F46E5; }
+.step-dot-student.active {
+  background: #0284C7;
+}
+
+.step-dot-organizer.active {
+  background: #D97706;
+}
+
+.step-dot-coach.active {
+  background: #4F46E5;
+}
 
 /* Labels */
 .field-label {
@@ -257,6 +272,15 @@ body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}

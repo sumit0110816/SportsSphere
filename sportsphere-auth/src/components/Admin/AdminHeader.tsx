@@ -190,17 +190,16 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                 ? 'rgba(16, 185, 129, 0.15)'
                 : '#ECFDF5'
               : isDark
-              ? 'rgba(245, 158, 11, 0.15)'
-              : '#FFFBEB',
-            border: `1px solid ${
-              isLiveDb
-                ? isDark
-                  ? 'rgba(16, 185, 129, 0.3)'
-                  : '#A7F3D0'
-                : isDark
+                ? 'rgba(245, 158, 11, 0.15)'
+                : '#FFFBEB',
+            border: `1px solid ${isLiveDb
+              ? isDark
+                ? 'rgba(16, 185, 129, 0.3)'
+                : '#A7F3D0'
+              : isDark
                 ? 'rgba(245, 158, 11, 0.3)'
                 : '#FDE68A'
-            }`,
+              }`,
             fontSize: '11.5px',
             fontWeight: 600,
             color: isLiveDb ? '#059669' : '#D97706',
